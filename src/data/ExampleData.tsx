@@ -1,4 +1,9 @@
-import { ObjectiveData, ProblemInfo, NavigationData } from "../types/ProblemTypes";
+import { 
+  ObjectiveData, 
+  ProblemInfo, 
+  NavigationData,
+  ScenarioBasedSolutionCollection
+ } from "../types/ProblemTypes";
 
 export const exampleProblemInfo3ObjectiveData: ProblemInfo = {
   problemId: 0,
@@ -159,4 +164,27 @@ export const exampleDataTen4Objectives: ObjectiveData = {
       value: [33.3, 0.81, -150, 10],
     },
   ],
+};
+
+export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionCollection = {
+  solutions: [
+    [
+      {scenarioId: 's1', objectiveId: 'o1', objectiveValue: 1.00},
+      {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 1.00},
+      {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 1.50},
+      {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 1.50}
+    ],
+    [
+      {scenarioId: 's1', objectiveId: 'o1', objectiveValue: 1.00},
+      {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 1.00},
+      {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 0.50},
+      {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 0.50}
+    ]
+  ],
+  objectivesToMaximize: new Map<string, boolean>()
+    .set('o1', true)
+    .set('o2', false),
+  objectiveIdeals: new Map<string, number>()
+    .set('o1', 0.50)
+    .set('o2', 1.50)
 };

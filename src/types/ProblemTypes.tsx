@@ -40,6 +40,19 @@ type NavigationData = {
   navigationPoint?: number[];
 };
 
+type ScenarioBasedObjectiveValue = {
+  scenarioId: string;
+  objectiveId: string;
+  objectiveValue: number;
+}
+
+type ScenarioBasedSolution = ScenarioBasedObjectiveValue[];
+
+type ScenarioBasedSolutionCollection = {
+  solutions: ScenarioBasedSolution[];
+  objectivesToMaximize: Map<string, boolean>;
+  objectiveIdeals?: Map<string, number>;
+}
 
 export type {
   ProblemInfo,
@@ -48,4 +61,5 @@ export type {
   ObjectiveData,
   ObjectiveDatum,
   NavigationData,
+  ScenarioBasedSolutionCollection
 };
