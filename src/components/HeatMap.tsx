@@ -4,6 +4,7 @@ import { scaleBand } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { interpolateBlues } from "d3-scale-chromatic";
 import { ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
+import { pointer } from "d3-selection";
 import "d3-transition";
 import "./Svg.css";
 
@@ -35,8 +36,34 @@ const HeatMap = ({solutions} : HeatMapProps) => {
             .attr("transform", `translate(${defaultDimensions.margin.left},${defaultDimensions.margin.top})`);
 
         const tooltip = svgContainer
-            .append('div')
-            .classed('tooltip', true);
+            .append('g')
+            .classed('tooltip', true)
+            .style('pointer-events', 'none')
+            .style('visibility', 'hidden')
+            .style('background-color', 'white')
+            .style('border', 'solid')
+            .style('border-width', '2px')
+            .style('border-radius', '5px')
+            .style('padding', '5px')
+            .style('position', 'absolute');
+
+        const tooltipMouseover = 
+            () => {
+                tooltip.style('visibility', 'visible');
+            }
+        const tooltipMousemove = 
+            (event, datum) => {
+                const [x,y] = pointer(event);
+                tooltip
+                    .html(`Value: ${datum.objectiveValue.toString()}`)
+                    .style('left', `${x+20}px`)
+                    .style('top', `${y-10}px`);
+                    //.attr('transform', `translate(${x},${y})`);
+            }
+        const tooltipMouseleave = 
+            () => {
+                tooltip.style('visibility', 'hidden');
+            }
 
         const xScale = scaleBand()
             .range([0, defaultDimensions.width])
@@ -68,6 +95,9 @@ const HeatMap = ({solutions} : HeatMapProps) => {
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
             .style('fill', datum => interpolateBlues(datum.objectiveValue))
+            .on('mousemove', tooltipMousemove)
+            .on('mouseleave', tooltipMouseleave)
+            .on('mouseover', tooltipMouseover)
             /**/
         }
     });
