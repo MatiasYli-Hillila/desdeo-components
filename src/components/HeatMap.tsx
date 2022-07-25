@@ -3,77 +3,77 @@ import { select } from "d3-selection";
 import { scaleBand } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { interpolateBlues } from "d3-scale-chromatic";
+import { ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import "d3-transition";
 import "./Svg.css";
 
-const HeatMap = () => {
+interface HeatMapProps {
+    solutions : ScenarioBasedSolutionCollection;
+    width?: number;
+    height?: number;
+}
 
-    const svgRef = useRef(null);
-    const 
-        width = 800,
-        height = 800,
-        margin = {top: 20, right: 20, bottom: 20, left: 20},
-        svgWidth = width + margin.left + margin.right,
-        svgHeight = height + margin.top + margin.bottom;        
+const HeatMap = ({solutions} : HeatMapProps) => {
+    const ref = useRef(null);
+    const defaultDimensions = {
+        width: 300,
+        height: 300,
+        margin: {top: 20, right: 20, bottom: 20, left: 20}
+    }       
 
     useEffect(() => {
+        const svgContainer = select(ref.current)
+            //.classed('component-container', true);
+
+        //svgContainer.selectAll('*').remove();
+        
+        const svg = svgContainer
+            .append('svg')
+            .classed('svg-content', true)
+            .attr('width', defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right)
+            .attr('height', defaultDimensions.height + defaultDimensions.margin.top + defaultDimensions.margin.bottom)
+            .attr("transform", `translate(${defaultDimensions.margin.left},${defaultDimensions.margin.top})`);
+
+        const tooltip = svgContainer
+            .append('div')
+            .classed('tooltip', true);
 
         const xScale = scaleBand()
-            .range([0, width])
-            .domain(['s1','s2','s3'])
+            .range([0, defaultDimensions.width])
+            .domain(solutions.scenarioIds)
             .padding(0.01);
-
-        const yScale = scaleBand()
-            .range([height, 0])
-            .domain(['f1','f2','f3'])
-            .padding(0.01);
-        
-        const svgEl = select(svgRef.current);
-        svgEl.selectAll('*').remove();
-        const svg = svgEl
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
-
         const xAxis = axisBottom(xScale);
         svg.append("g")
-            .attr("transform", `translate(0,${height})`)
+            .attr("transform", `translate(0,${defaultDimensions.height})`)
             .call(xAxis);
-        //xAxisGroup.select(".domain").remove();
-        
+
+        const yScale = scaleBand()
+            .range([defaultDimensions.height, 0])
+            .domain(solutions.objectiveIds)
+            .padding(0.01);
         const yAxis = axisLeft(yScale);
         svg.append("g")
             .call(yAxis);
-        //yAxisGroup.select(".domain").remove();
 
-        type asdf = Array<[string, string, number]>;
+        if (svg === undefined) console.log('svg undefined');
+        else{
 
-        const data : asdf = [
-            ['s1','f1',0.0],
-            ['s1','f2',0.3],
-            ['s2','f1',0.6],
-            ['s2','f2',0.9]
-        ];
-
-        const data2 = [
-            {solution: 's1', function: 'f1', value: 0.2},
-            {solution: 's1', function: 'f2', value: 0.4},
-            {solution: 's2', function: 'f1', value: 0.6},
-            {solution: 's2', function: 'f2', value: 0.8}
-        ]
-
+        
         svg.selectAll()
-            .data(data2)
+            .data(solutions.solutions[0], d => d)
             .enter()
             .append('rect')
-            .attr('x', (data) => xScale(data.solution))
-            .attr('y', data => yScale(data.function))
+            .attr('x', datum => xScale(datum.scenarioId))
+            .attr('y', datum => yScale(datum.objectiveId))
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
-            .style('fill', data => interpolateBlues(data.value))
+            .style('fill', datum => interpolateBlues(datum.objectiveValue))
+            /**/
+        }
     });
 
-    //return <div ref={svgRef} id="container" className="svg-container"/>
-    return <svg ref={svgRef} width={svgWidth} height={svgHeight} />;
+    return <div ref={ref} id="container" className="component-container"/>
+    //return <svg ref={ref} width={svgWidth} height={svgHeight} />;
 }; 
 
 export default HeatMap;

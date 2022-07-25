@@ -186,5 +186,7 @@ export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionC
     .set('o2', false),
   objectiveIdeals: new Map<string, number>()
     .set('o1', 0.50)
-    .set('o2', 1.50)
+    .set('o2', 1.50),
+  scenarioIds: ['s1', 's2'],
+  objectiveIds: ['o1', 'o2']
 };

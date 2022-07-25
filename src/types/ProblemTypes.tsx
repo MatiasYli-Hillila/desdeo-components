@@ -52,6 +52,8 @@ type ScenarioBasedSolutionCollection = {
   solutions: ScenarioBasedSolution[];
   objectivesToMaximize: Map<string, boolean>;
   objectiveIdeals?: Map<string, number>;
+  scenarioIds: string[];
+  objectiveIds: string[];
 }
 
 export type {
