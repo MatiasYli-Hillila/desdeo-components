@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+//import { useEffect, useRef } from "react";
 import { select } from "d3-selection";
 import { scaleBand } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
@@ -7,39 +8,69 @@ import { ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import { pointer } from "d3-selection";
 import "d3-transition";
 import "./Svg.css";
-import { extent } from "d3-array";
+//import { extent } from "d3-array";
+import { drag } from "d3-drag";
 
 interface HeatMapProps {
-    solutions : ScenarioBasedSolutionCollection;
+    solutionCollection : ScenarioBasedSolutionCollection;
     width?: number;
     height?: number;
 }
 
-const HeatMap = ({solutions} : HeatMapProps) => {
+const HeatMap = ({solutionCollection} : HeatMapProps) => {
     const ref = useRef(null);
-    const defaultDimensions = {
-        width: 300,
-        height: 300,
-        margin: {top: 80, right: 20, bottom: 20, left: 20}
-    }       
 
-    const switchSolutions = (i: number, j: number) => {
-        [solutions.solutions[i], solutions.solutions[j]] = [solutions.solutions[j], solutions.solutions[i]];
-    }
+    const [solutionState, setSolutionsState] = useState(solutionCollection);
+
+    useEffect(() => {
+        setSolutionsState(solutionCollection)
+    }, [solutionCollection]);
+
+    //var currentDraggedSolutionPosition = [0,0];
+    //var mouseoveredSolution: any = null;
+    //var currentDraggedSolution: any = null;
+    
+
+    
+    
+
+    /* 
+    const switchTwoSolutionElements = (element1: Element, element2: Element) => {
+        console.log(`element1: ${element1}, element2: ${element2}`);
+        const temp = element1;
+        element1 = element2;
+        element2 = temp;
+    };
+    */
 
     useEffect(() => {
 
-        //switchSolutions(0,1);
+        const defaultDimensions = {
+            width: 300,
+            height: 300,
+            margin: {top: 80, right: 20, bottom: 20, left: 20}
+        }
+
+        var mouseoveredSolutionIndex: number | null = null;
+        var currentDraggedSolutionIndex: number | null = null;
+
+        const switchSolutions = (i: number, j: number) => {
+            [solutionState.solutions[i], solutionState.solutions[j]] = [solutionState.solutions[j], solutionState.solutions[i]];
+            setSolutionsState(solutionCollection);
+        };
+
+        //switchSolutions(solutionCollection, 0,1);
         
             //.classed('component-container', true);
 
         //svgContainer.selectAll('*').remove();
 
-        for (let i = 0; i < solutions.solutions.length; i++) {
+        for (let i = 0; i < solutionState.solutions.length; i++) {
             const svgContainer = select(ref.current)
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
+            .attr('id', solutionState.solutions[i].solutionId)
             .attr('width', defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right)
             .attr('height', defaultDimensions.height + defaultDimensions.margin.top + defaultDimensions.margin.bottom)
             .attr(
@@ -50,45 +81,107 @@ const HeatMap = ({solutions} : HeatMapProps) => {
                 )`
             );
 
-        const tooltip = svgContainer
-            .append('g')
-            .classed('tooltip', true)
-            .style('pointer-events', 'none')
-            .style('visibility', 'hidden')
-            .style('background-color', 'white')
-            .style('border', 'solid')
-            .style('border-width', '2px')
-            .style('border-radius', '5px')
-            .style('padding', '5px')
-            .style('position', 'absolute');
 
-        const tooltipMouseover = 
-            () => {
+            
+
+        
+
+        const tooltipMouseover = () => {
                 tooltip.style('visibility', 'visible');
-            }
-        const tooltipMousemove = 
-            (event : any, datum : any) => {
+        };
+        const tooltipMousemove = (event : any, datum : any) => {
                 const [x,y] = pointer(event);
                 var percentOfIdealString = '';
-                if (solutions.objectiveIdeals?.get(datum.objectiveId) === undefined) return;
-                else if (solutions.objectivesToMaximize.get(datum.objectiveId))
-                    percentOfIdealString = `solution/ideal (maximizing): ${(datum.objectiveValue / solutions.objectiveIdeals?.get(datum.objectiveId)).toFixed(2)}`;
+                if (solutionState.objectiveIdeals.get(datum.objectiveId) === undefined) return;
+                else if (solutionState.objectivesToMaximize.get(datum.objectiveId))
+                    // TODO: figure out how to remove ts-ignore here
+                    // @ts-ignore
+                    percentOfIdealString = `solution/ideal (maximizing): ${(datum.objectiveValue / solutionState.objectiveIdeals.get(datum.objectiveId)).toFixed(2)}`;
                 else 
-                    percentOfIdealString = `ideal/solution (minimizing): ${(solutions.objectiveIdeals?.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
+                    // TODO: figure out how to remove ts-ignore here
+                    // @ts-ignore
+                    percentOfIdealString = `ideal/solution (minimizing): ${(solutionState.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
                 tooltip
                     .html(`Value: ${datum.objectiveValue.toString()}; ${percentOfIdealString}`)
                     .style('left', `${x+20}px`)
                     .style('top', `${y-10}px`);
                     //.attr('transform', `translate(${x},${y})`);
-            }
-        const tooltipMouseleave = 
-            () => {
+        };
+        const tooltipMouseleave = () => {
                 tooltip.style('visibility', 'hidden');
+        };
+
+        const solutionMouseover = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            const solutionId = target.classList.value;
+            const solutionIndex = solutionState.solutions.findIndex(i => i.solutionId === solutionId);
+            mouseoveredSolutionIndex = solutionIndex;
+        };
+
+        // TODO: see if this can be done without eslint-disable 
+        // eslint-disable-next-line no-loop-func
+        const dragStart = (wut: any) => {
+            //console.log('Drag started')
+            const solutionId = wut.sourceEvent.target.classList.value;
+            const solutionIndex = solutionState.solutions.findIndex(i => i.solutionId === solutionId);
+            currentDraggedSolutionIndex = solutionIndex;
+            //currentDraggedSolution = wut.sourceEvent.srcElement.parentElement;
+            //console.log(`currentDraggedSolution: ${currentDraggedSolution}`);
+            //currentDraggedSolutionPosition = [event.x, event.y];
+            
+            //console.log(event.x, event.y);
+            //console.log(currentDraggedSolutionPosition);
+        }
+
+        
+        /* const dragMove = (event: any) => {
+            
+            
+            console.log(`
+                event.target: ${event.target}
+                event.type: ${event.type}
+                event.subject: ${event.subject}
+                event.x: ${event.x}
+                event.y: ${event.y}
+                event.dx: ${event.dx}
+                event.dy: ${event.dy}
+                event.identifier: ${event.identifier}
+                event.active: ${event.active}
+                event.sourceEvent: ${event.sourceEvent}
+            `);
+            
+           //console.log(event.subject.)
+           //var svg = select('svg');
+                const mouseovered = document.elementFromPoint(event.x, event.y);
+                if (mouseovered === null) return;
+                console.log(mouseovered.tagName);
+            
+        }; */
+
+        //const dragEnd = (event: any) => {
+        // eslint-disable-next-line no-loop-func
+        const dragEnd = () => {
+            if (mouseoveredSolutionIndex === null || currentDraggedSolutionIndex === null) return;
+            else switchSolutions(currentDraggedSolutionIndex, mouseoveredSolutionIndex);
+            //switchTwoSolutionElements(currentDraggedSolution, mouseoveredSolution);
+            
+            //setSolutionsState(i: number, j: number => {})
+            /*
+            var switchSolutions = (solutionsCollection: ScenarioBasedSolutionCollection, i: number, j: number) => {
+                [solutions.solutions[i], solutions.solutions[j]] = [solutions.solutions[j], solutions.solutions[i]];
             }
+            */
+            
+        }
+
+        const dragTest = drag()
+            .on('start', dragStart)
+            //.on('drag', dragMove)
+            .on('end', dragEnd);
 
         const xScale = scaleBand()
             .range([0, defaultDimensions.width])
-            .domain(solutions.scenarioIds)
+            .domain(solutionState.scenarioIds)
             .padding(0.01);
         const xAxis = axisBottom(xScale);
         svg.append("g")
@@ -97,7 +190,7 @@ const HeatMap = ({solutions} : HeatMapProps) => {
 
         const yScale = scaleBand()
             .range([defaultDimensions.height, 0])
-            .domain(solutions.objectiveIds)
+            .domain(solutionState.objectiveIds)
             .padding(0.01);
         const yAxis = axisLeft(yScale);
         svg.append("g")
@@ -108,25 +201,50 @@ const HeatMap = ({solutions} : HeatMapProps) => {
 
         if (svg === undefined) console.log('svg undefined');
 
-            
+        svg.append('g').append('text')
+
+            .attr("x", (defaultDimensions.width / 2))             
+        .attr("y", 0 - (defaultDimensions.margin.top / 2))
+        .style("text-anchor", "middle") 
+        //.style("font-size", "16px") 
+        //.style("text-decoration", "underline")  
+        .text(() => solutionState.solutions[i].solutionId.toString())
+        //.text(() => 'asdf')
+        .style('fill', 'black')
+
+        // TODO: figure out how to remove ts-ignore here
+        // @ts-ignore
         svg.selectAll()
-            .data(solutions.solutions[i])
+            .append('g')
+            .data(solutionState.solutions[i].objectiveValues)
             .enter()
             .append('rect')
+            .attr('class', solutionState.solutions[i].solutionId)
             .attr('x', datum => xScale(datum.scenarioId))
             .attr('y', datum => yScale(datum.objectiveId))
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
             .style('fill', datum => {
-                if (solutions.objectivesToMaximize.get(datum.objectiveId)) 
+                if (solutionState.objectivesToMaximize.get(datum.objectiveId)) 
                     // TODO: calculate solutions.objectiveIdeals from the biggest/smallest value if not provided
-                    return interpolateBlues(datum.objectiveValue / solutions.objectiveIdeals?.get(datum.objectiveId));
+                    // TODO: figure out how to remove ts-ignore here.
+                    // @ts-ignore
+                    return interpolateBlues(datum.objectiveValue / solutionState.objectiveIdeals?.get(datum.objectiveId));
                 else 
-                    return interpolateBlues(solutions.objectiveIdeals?.get(datum.objectiveId) / datum.objectiveValue);
+                    // @ts-ignore
+                    return interpolateBlues(solutionState.objectiveIdeals?.get(datum.objectiveId) / datum.objectiveValue);
             })
             .on('mousemove', tooltipMousemove)
             .on('mouseleave', tooltipMouseleave)
-            .on('mouseover', tooltipMouseover)
+            .on('mouseover', (d) => {
+                tooltipMouseover(); 
+                solutionMouseover(d);
+            })
+            //.on('mouseover', solutionMouseover)
+            // TODO: figure out how to remove ts-ignore here
+            // @ts-ignore
+            .call(dragTest);
+            
             /**/
 
         const legendColors = [interpolateBlues(1), interpolateBlues(0)];
@@ -175,9 +293,28 @@ const HeatMap = ({solutions} : HeatMapProps) => {
             .attr('x', defaultDimensions.width + defaultDimensions.margin.right)
             .attr('y', defaultDimensions.height/2 - 64/2)
             .style('fill', 'url(#legendGradient)')
+
+            
+            const tooltip = svgContainer
+            .append('g')
+            .classed('tooltip', true)
+            .style('pointer-events', 'none')
+            .style('visibility', 'hidden')
+            .style('background-color', 'white')
+            .style('border', 'solid')
+            .style('border-width', '2px')
+            .style('border-radius', '5px')
+            .style('padding', '5px')
+            .style('position', 'absolute')
+            // TODO: is this a hack?
+            .style('z-index', 1000);
+            
         }
         
         
+        
+        
+    //}, [solutionCollection, solutionsState]);
     });
 
     return <div ref={ref} id="container" className="component-container"/>
