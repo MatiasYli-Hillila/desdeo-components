@@ -1,7 +1,10 @@
 import React, { ComponentProps } from "react";
 import { Story } from "@storybook/react";
 import HeatMap from "../components/HeatMap";
-import { exampleData2Objectives2Scenarios2Solutions } from "../data/ExampleData";
+import { 
+  exampleData2Objectives2Scenarios2Solutions, 
+  exampleData3Objectives3Scenarios3Solutions 
+} from "../data/ExampleData";
 
 export default {
   title: "HeatMap",
@@ -19,4 +22,9 @@ const Template: Story<ComponentProps<typeof HeatMap>> = (args) => {
 export const TwoObjectivesTwoScenariosTwoSolutions = Template.bind({});
 TwoObjectivesTwoScenariosTwoSolutions.args = {
   solutionCollection: exampleData2Objectives2Scenarios2Solutions
+}
+
+export const ThreeObjectivesThreeScenariosThreeSolutions = Template.bind({});
+ThreeObjectivesThreeScenariosThreeSolutions.args = {
+  solutionCollection: exampleData3Objectives3Scenarios3Solutions
 }

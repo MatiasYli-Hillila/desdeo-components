@@ -184,14 +184,72 @@ export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionC
         {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 0.50},
         {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 0.25},
         {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 1.50}
-      ]}
+      ]
+    }
     ],
     objectivesToMaximize: new Map<string, boolean>()
-    .set('o1', true)
-    .set('o2', false),
+      .set('o1', true)
+      .set('o2', false),
     objectiveIdeals: new Map<string, number>()
-    .set('o1', 1.50)
-    .set('o2', 0.50),
+      .set('o1', 1.50)
+      .set('o2', 0.50),
     scenarioIds: ['s1', 's2'],
     objectiveIds: ['o1', 'o2']
   };
+  
+  export const exampleData3Objectives3Scenarios3Solutions : ScenarioBasedSolutionCollection = {
+    solutions: [
+      {
+        solutionId: 'Sol A',
+        objectiveValues: [
+          {scenarioId: 'scenario 1', objectiveId: 'objective 1', objectiveValue: 1.00},
+          {scenarioId: 'scenario 1', objectiveId: 'objective 2', objectiveValue: 1.00},
+          {scenarioId: 'scenario 1', objectiveId: 'objective 3', objectiveValue: 1.00},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 1', objectiveValue: 1.00},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 2', objectiveValue: 1.00},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 3', objectiveValue: 1.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 1', objectiveValue: 1.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 2', objectiveValue: 1.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 3', objectiveValue: 1.00}
+        ]
+      },
+      {
+        solutionId: 'Sol B',
+        objectiveValues: [
+          {scenarioId: 'scenario 1', objectiveId: 'objective 1', objectiveValue: 0.20},
+          {scenarioId: 'scenario 1', objectiveId: 'objective 2', objectiveValue: 0.20},
+          {scenarioId: 'scenario 1', objectiveId: 'objective 3', objectiveValue: 0.20},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 1', objectiveValue: 2.00},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 2', objectiveValue: 2.00},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 3', objectiveValue: 2.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 1', objectiveValue: 1.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 2', objectiveValue: 1.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 3', objectiveValue: 1.00}
+        ]
+      }, 
+      {
+        solutionId: 'Sol C',
+        objectiveValues: [
+          {scenarioId: 'scenario 1', objectiveId: 'objective 1', objectiveValue: 1.10},
+          {scenarioId: 'scenario 1', objectiveId: 'objective 2', objectiveValue: 1.10},
+          {scenarioId: 'scenario 1', objectiveId: 'objective 3', objectiveValue: 1.10},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 1', objectiveValue: 0.85},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 2', objectiveValue: 1.10},
+          {scenarioId: 'scenario 2', objectiveId: 'objective 3', objectiveValue: 1.10},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 1', objectiveValue: 0.95},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 2', objectiveValue: 1.00},
+          {scenarioId: 'scenario 3', objectiveId: 'objective 3', objectiveValue: 1.00}
+        ]
+      }
+      ],
+      objectivesToMaximize: new Map<string, boolean>()
+        .set('objective 1', false)
+        .set('objective 2', false)
+        .set('objective 2', false),
+      objectiveIdeals: new Map<string, number>()
+        .set('objective 1', 0)
+        .set('objective 2', 0)
+        .set('objective 3', 0),
+      scenarioIds: ['scenario 1', 'scenario 2', 'scenario 3'],
+      objectiveIds: ['objective 1', 'objective 2', 'objective 3']
+    };
