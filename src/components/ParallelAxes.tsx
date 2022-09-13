@@ -1,15 +1,12 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { select, Selection, pointer } from "d3-selection";
-import { scaleLinear, scaleBand } from "d3-scale";
-import { axisLeft } from "d3-axis";
-import { line } from "d3-shape";
-import "d3-transition";
-import { easeCubic } from "d3-ease";
-import "./Svg.css";
-import { ObjectiveData } from "../types/ProblemTypes";
-import { RectDimensions } from "../types/ComponentTypes";
-import { filter } from "d3-array";
-import { active } from "d3-transition";
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { select, Selection } from 'd3-selection';
+import { scaleLinear, scaleBand } from 'd3-scale';
+import { axisLeft } from 'd3-axis';
+import { line } from 'd3-shape';
+import 'd3-transition';
+import './Svg.css';
+import { ObjectiveData } from '../types/ProblemTypes';
+import { RectDimensions } from '../types/ComponentTypes';
 
 interface ParallelAxesProps {
   objectiveData: ObjectiveData;
