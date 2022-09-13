@@ -26,23 +26,6 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         setSolutionsState(solutionCollection)
     }, [solutionCollection]);
 
-    //var currentDraggedSolutionPosition = [0,0];
-    //var mouseoveredSolution: any = null;
-    //var currentDraggedSolution: any = null;
-    
-
-    
-    
-
-    /* 
-    const switchTwoSolutionElements = (element1: Element, element2: Element) => {
-        console.log(`element1: ${element1}, element2: ${element2}`);
-        const temp = element1;
-        element1 = element2;
-        element2 = temp;
-    };
-    */
-
     useEffect(() => {
 
         const defaultDimensions = {
@@ -59,11 +42,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             setSolutionsState(solutionCollection);
         };
 
-        //switchSolutions(solutionCollection, 0,1);
         
-            //.classed('component-container', true);
-
-        //svgContainer.selectAll('*').remove();
 
         for (let i = 0; i < solutionState.solutions.length; i++) {
             const svgContainer = select(ref.current)
@@ -121,57 +100,16 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         // TODO: see if this can be done without eslint-disable 
         // eslint-disable-next-line no-loop-func
         const dragStart = (wut: any) => {
-            //console.log('Drag started')
             const solutionId = wut.sourceEvent.target.classList.value;
             const solutionIndex = solutionState.solutions.findIndex(i => i.solutionId === solutionId);
             currentDraggedSolutionIndex = solutionIndex;
-            //currentDraggedSolution = wut.sourceEvent.srcElement.parentElement;
-            //console.log(`currentDraggedSolution: ${currentDraggedSolution}`);
-            //currentDraggedSolutionPosition = [event.x, event.y];
-            
-            //console.log(event.x, event.y);
-            //console.log(currentDraggedSolutionPosition);
         }
-
-        
-        /* const dragMove = (event: any) => {
-            
-            
-            console.log(`
-                event.target: ${event.target}
-                event.type: ${event.type}
-                event.subject: ${event.subject}
-                event.x: ${event.x}
-                event.y: ${event.y}
-                event.dx: ${event.dx}
-                event.dy: ${event.dy}
-                event.identifier: ${event.identifier}
-                event.active: ${event.active}
-                event.sourceEvent: ${event.sourceEvent}
-            `);
-            
-           //console.log(event.subject.)
-           //var svg = select('svg');
-                const mouseovered = document.elementFromPoint(event.x, event.y);
-                if (mouseovered === null) return;
-                console.log(mouseovered.tagName);
-            
-        }; */
 
         //const dragEnd = (event: any) => {
         // eslint-disable-next-line no-loop-func
         const dragEnd = () => {
             if (mouseoveredSolutionIndex === null || currentDraggedSolutionIndex === null) return;
             else switchSolutions(currentDraggedSolutionIndex, mouseoveredSolutionIndex);
-            //switchTwoSolutionElements(currentDraggedSolution, mouseoveredSolution);
-            
-            //setSolutionsState(i: number, j: number => {})
-            /*
-            var switchSolutions = (solutionsCollection: ScenarioBasedSolutionCollection, i: number, j: number) => {
-                [solutions.solutions[i], solutions.solutions[j]] = [solutions.solutions[j], solutions.solutions[i]];
-            }
-            */
-            
         }
 
         const dragTest = drag()
