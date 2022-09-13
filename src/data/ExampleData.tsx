@@ -3,7 +3,7 @@ import {
   ProblemInfo, 
   NavigationData,
   ScenarioBasedSolutionCollection
- } from "../types/ProblemTypes";
+} from "../types/ProblemTypes";
 
 export const exampleProblemInfo3ObjectiveData: ProblemInfo = {
   problemId: 0,
@@ -168,25 +168,30 @@ export const exampleDataTen4Objectives: ObjectiveData = {
 
 export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionCollection = {
   solutions: [
-    [
-      {scenarioId: 's1', objectiveId: 'o1', objectiveValue: 1.00},
-      {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 1.00},
-      {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 1.50},
-      {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 1.50}
+    {
+      solutionId: 'Solution 1',
+      objectiveValues: [
+        {scenarioId: 's1', objectiveId: 'o1', objectiveValue: 1.25},
+        {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 0.75},
+        {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 1.00},
+        {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 1.00}
+      ]
+    },
+    {
+      solutionId: 'Solution 2',
+      objectiveValues: [
+        {scenarioId: 's1', objectiveId: 'o1', objectiveValue: 1.50},
+        {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 0.50},
+        {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 0.25},
+        {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 1.50}
+      ]}
     ],
-    [
-      {scenarioId: 's1', objectiveId: 'o1', objectiveValue: 1.00},
-      {scenarioId: 's1', objectiveId: 'o2', objectiveValue: 1.00},
-      {scenarioId: 's2', objectiveId: 'o1', objectiveValue: 0.50},
-      {scenarioId: 's2', objectiveId: 'o2', objectiveValue: 0.50}
-    ]
-  ],
-  objectivesToMaximize: new Map<string, boolean>()
+    objectivesToMaximize: new Map<string, boolean>()
     .set('o1', true)
     .set('o2', false),
-  objectiveIdeals: new Map<string, number>()
-    .set('o1', 0.50)
-    .set('o2', 1.50),
-  scenarioIds: ['s1', 's2'],
-  objectiveIds: ['o1', 'o2']
-};
+    objectiveIdeals: new Map<string, number>()
+    .set('o1', 1.50)
+    .set('o2', 0.50),
+    scenarioIds: ['s1', 's2'],
+    objectiveIds: ['o1', 'o2']
+  };
