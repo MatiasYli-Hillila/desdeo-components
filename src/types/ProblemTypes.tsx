@@ -46,12 +46,15 @@ type ScenarioBasedObjectiveValue = {
   objectiveValue: number;
 }
 
-type ScenarioBasedSolution = ScenarioBasedObjectiveValue[];
+type ScenarioBasedSolution = {
+  solutionId: string;
+  objectiveValues: ScenarioBasedObjectiveValue[];
+}
 
 type ScenarioBasedSolutionCollection = {
   solutions: ScenarioBasedSolution[];
   objectivesToMaximize: Map<string, boolean>;
-  objectiveIdeals?: Map<string, number>;
+  objectiveIdeals: Map<string, number>;
   scenarioIds: string[];
   objectiveIds: string[];
 }
