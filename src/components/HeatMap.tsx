@@ -34,6 +34,11 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             margin: {top: 80, right: 20, bottom: 20, left: 20}
         }
 
+        const renderH =
+        defaultDimensions.height + defaultDimensions.margin.bottom + defaultDimensions.margin.top;
+            const renderW =
+        defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right;
+
         var mouseoveredSolutionIndex: number | null = null;
         var currentDraggedSolutionIndex: number | null = null;
 
@@ -49,6 +54,8 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
+            .attr('preserveAspectRatio', 'xMidYMin meet')
+                .attr('viewBox', `0 0 ${renderW} ${renderH}`)
             .attr('id', solutionState.solutions[i].solutionId)
             .attr('width', defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right)
             .attr('height', defaultDimensions.height + defaultDimensions.margin.top + defaultDimensions.margin.bottom)
@@ -59,11 +66,6 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
                     ${defaultDimensions.margin.top}
                 )`
             );
-
-
-            
-
-        
 
         const tooltipMouseover = () => {
                 tooltip.style('visibility', 'visible');
@@ -90,6 +92,8 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
                 tooltip.style('visibility', 'hidden');
         };
 
+        // TODO: see if this can be done without eslint-disable 
+        // eslint-disable-next-line no-loop-func
         const solutionMouseover = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const solutionId = target.classList.value;
@@ -123,7 +127,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .padding(0.01);
         const xAxis = axisBottom(xScale);
         svg.append("g")
-            .attr("transform", `translate(0,${defaultDimensions.height})`)
+            .attr("transform", `translate(${defaultDimensions.margin.left},${defaultDimensions.height + defaultDimensions.margin.top})`)
             .call(xAxis);
 
         const yScale = scaleBand()
@@ -132,23 +136,23 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .padding(0.01);
         const yAxis = axisLeft(yScale);
         svg.append("g")
-            //.attr('transform', `translate(${defaultDimensions.margin.left},0)`)
+            .attr('transform', `translate(${defaultDimensions.margin.left},${defaultDimensions.margin.top})`)
             //.attr('x', -60)
             //.style('fill', 'red')
             .call(yAxis);
 
         if (svg === undefined) console.log('svg undefined');
 
-        svg.append('g').append('text')
+        svg.append('text')
 
             .attr("x", (defaultDimensions.width / 2))             
-        .attr("y", 0 - (defaultDimensions.margin.top / 2))
+        .attr("y", (defaultDimensions.margin.top / 2))
         .style("text-anchor", "middle") 
-        //.style("font-size", "16px") 
+        .style("font-size", "16px") 
         //.style("text-decoration", "underline")  
         .text(() => solutionState.solutions[i].solutionId.toString())
         //.text(() => 'asdf')
-        .style('fill', 'black')
+        //.style('fill', 'black')
 
         // TODO: figure out how to remove ts-ignore here
         // @ts-ignore
@@ -158,8 +162,12 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .enter()
             .append('rect')
             .attr('class', solutionState.solutions[i].solutionId)
-            .attr('x', datum => xScale(datum.scenarioId))
-            .attr('y', datum => yScale(datum.objectiveId))
+            // TODO: figure out how to remove ts-ignore here
+            // @ts-ignore
+            .attr('x', datum => xScale(datum.scenarioId) + defaultDimensions.margin.left)
+            // TODO: figure out how to remove ts-ignore here
+            // @ts-ignore
+            .attr('y', datum => yScale(datum.objectiveId) + defaultDimensions.margin.top)
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
             .style('fill', datum => {
@@ -185,7 +193,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             
             /**/
 
-        const legendColors = [interpolateBlues(1), interpolateBlues(0)];
+        //const legendColors = [interpolateBlues(1), interpolateBlues(0)];
         // TODO: what does this actually do?
         //var todoChangeNameOfThis = extent(legendColors, d => d.value);
         /*
@@ -201,6 +209,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .append('linearGradient')
         */
 
+            /*
         const legendGradient = svg.append('defs')
             .append('linearGradient')
             .attr('id', 'legendGradient')
@@ -231,6 +240,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .attr('x', defaultDimensions.width + defaultDimensions.margin.right)
             .attr('y', defaultDimensions.height/2 - 64/2)
             .style('fill', 'url(#legendGradient)')
+        */
 
             
             const tooltip = svgContainer
