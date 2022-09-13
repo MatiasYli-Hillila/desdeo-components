@@ -18,5 +18,5 @@ const Template: Story<ComponentProps<typeof HeatMap>> = (args) => {
 
 export const TwoObjectivesTwoScenariosTwoSolutions = Template.bind({});
 TwoObjectivesTwoScenariosTwoSolutions.args = {
-  solutions: exampleData2Objectives2Scenarios2Solutions
+  solutionCollection: exampleData2Objectives2Scenarios2Solutions
 }
