@@ -20,11 +20,12 @@ interface HeatMapProps {
 const HeatMap = ({solutionCollection} : HeatMapProps) => {
     const ref = useRef(null);
 
-    const [solutionState, setSolutionsState] = useState(solutionCollection);
+    const [solutionState, setSolutionsState] = useState(solutionCollection.solutions);
 
-    useEffect(() => {
-        setSolutionsState(solutionCollection)
-    }, [solutionCollection]);
+    useEffect(
+        () => {
+        setSolutionsState(solutionCollection.solutions)
+    }, [solutionCollection.solutions]);
 
     useEffect(() => {
 
@@ -43,20 +44,18 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         var currentDraggedSolutionIndex: number | null = null;
 
         const switchSolutions = (i: number, j: number) => {
-            [solutionState.solutions[i], solutionState.solutions[j]] = [solutionState.solutions[j], solutionState.solutions[i]];
-            setSolutionsState(solutionCollection);
+            [solutionState[i], solutionState[j]] = [solutionState[j], solutionState[i]];
+            //setSolutionsState(solutionCollection);
         };
 
-        
-
-        for (let i = 0; i < solutionState.solutions.length; i++) {
+        for (let i = 0; i < solutionState.length; i++) {
             const svgContainer = select(ref.current)
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
             .attr('preserveAspectRatio', 'xMidYMin meet')
                 .attr('viewBox', `0 0 ${renderW} ${renderH}`)
-            .attr('id', solutionState.solutions[i].solutionId)
+            .attr('id', solutionState[i].solutionId)
             .attr('width', defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right)
             .attr('height', defaultDimensions.height + defaultDimensions.margin.top + defaultDimensions.margin.bottom)
             .attr(
@@ -73,15 +72,15 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         const tooltipMousemove = (event : any, datum : any) => {
                 const [x,y] = pointer(event);
                 var percentOfIdealString = '';
-                if (solutionState.objectiveIdeals.get(datum.objectiveId) === undefined) return;
-                else if (solutionState.objectivesToMaximize.get(datum.objectiveId))
+                if (solutionCollection.objectiveIdeals.get(datum.objectiveId) === undefined) return;
+                else if (solutionCollection.objectivesToMaximize.get(datum.objectiveId))
                     // TODO: figure out how to remove ts-ignore here
                     // @ts-ignore
-                    percentOfIdealString = `solution/ideal (maximizing): ${(datum.objectiveValue / solutionState.objectiveIdeals.get(datum.objectiveId)).toFixed(2)}`;
+                    percentOfIdealString = `solution/ideal (maximizing): ${(datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId)).toFixed(2)}`;
                 else 
                     // TODO: figure out how to remove ts-ignore here
                     // @ts-ignore
-                    percentOfIdealString = `ideal/solution (minimizing): ${(solutionState.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
+                    percentOfIdealString = `ideal/solution (minimizing): ${(solutionCollection.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
                 tooltip
                     .html(`Value: ${datum.objectiveValue.toString()}; ${percentOfIdealString}`)
                     .style('left', `${x+20}px`)
@@ -97,7 +96,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         const solutionMouseover = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const solutionId = target.classList.value;
-            const solutionIndex = solutionState.solutions.findIndex(i => i.solutionId === solutionId);
+            const solutionIndex = solutionState.findIndex(i => i.solutionId === solutionId);
             mouseoveredSolutionIndex = solutionIndex;
         };
 
@@ -105,7 +104,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         // eslint-disable-next-line no-loop-func
         const dragStart = (wut: any) => {
             const solutionId = wut.sourceEvent.target.classList.value;
-            const solutionIndex = solutionState.solutions.findIndex(i => i.solutionId === solutionId);
+            const solutionIndex = solutionState.findIndex(i => i.solutionId === solutionId);
             currentDraggedSolutionIndex = solutionIndex;
         }
 
@@ -116,14 +115,26 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             else switchSolutions(currentDraggedSolutionIndex, mouseoveredSolutionIndex);
         }
 
+        const removeSolution = (event: MouseEvent) => {
+            const eventTarget = event.target as HTMLElement;
+            const solutionId = eventTarget.parentElement?.id;
+            console.log(solutionId);
+            if (solutionState.length > 1) {
+                const solutionToRemoveIndex = solutionState.findIndex(i => i.solutionId === solutionId);
+                setSolutionsState([
+                    ...solutionState.slice(0, solutionToRemoveIndex),
+                    ...solutionState.slice(solutionToRemoveIndex + 1, solutionState.length)
+                ]);
+            }
+        }
+
         const dragTest = drag()
             .on('start', dragStart)
-            //.on('drag', dragMove)
             .on('end', dragEnd);
 
         const xScale = scaleBand()
             .range([0, defaultDimensions.width])
-            .domain(solutionState.scenarioIds)
+            .domain(solutionCollection.scenarioIds)
             .padding(0.01);
         const xAxis = axisBottom(xScale);
         svg.append("g")
@@ -132,36 +143,32 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
 
         const yScale = scaleBand()
             .range([defaultDimensions.height, 0])
-            .domain(solutionState.objectiveIds)
+            .domain(solutionCollection.objectiveIds)
             .padding(0.01);
         const yAxis = axisLeft(yScale);
         svg.append("g")
             .attr('transform', `translate(${defaultDimensions.margin.left},${defaultDimensions.margin.top})`)
-            //.attr('x', -60)
-            //.style('fill', 'red')
             .call(yAxis);
 
         if (svg === undefined) console.log('svg undefined');
 
         svg.append('text')
-
             .attr("x", (defaultDimensions.width / 2))             
-        .attr("y", (defaultDimensions.margin.top / 2))
-        .style("text-anchor", "middle") 
-        .style("font-size", "16px") 
-        //.style("text-decoration", "underline")  
-        .text(() => solutionState.solutions[i].solutionId.toString())
-        //.text(() => 'asdf')
-        //.style('fill', 'black')
+            .attr("y", (defaultDimensions.margin.top / 2))
+            .style("text-anchor", "middle") 
+            .style("font-size", "16px") 
+            .text(() => solutionState[i].solutionId.toString())
+            .style('fill', 'black')
+            .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent))
 
         // TODO: figure out how to remove ts-ignore here
         // @ts-ignore
         svg.selectAll()
             .append('g')
-            .data(solutionState.solutions[i].objectiveValues)
+            .data(solutionState[i].objectiveValues)
             .enter()
             .append('rect')
-            .attr('class', solutionState.solutions[i].solutionId)
+            .attr('class', solutionState[i].solutionId)
             // TODO: figure out how to remove ts-ignore here
             // @ts-ignore
             .attr('x', datum => xScale(datum.scenarioId) + defaultDimensions.margin.left)
@@ -171,14 +178,16 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
             .style('fill', datum => {
-                if (solutionState.objectivesToMaximize.get(datum.objectiveId)) 
+                if (solutionCollection.objectivesToMaximize.get(datum.objectiveId)) 
                     // TODO: calculate solutions.objectiveIdeals from the biggest/smallest value if not provided
+                    // TODO: fix these calculations
                     // TODO: figure out how to remove ts-ignore here.
                     // @ts-ignore
-                    return interpolateBlues(datum.objectiveValue / solutionState.objectiveIdeals?.get(datum.objectiveId));
+                    return interpolateBlues(datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId));
                 else 
+                    // TODO: figure out how to remove ts-ignore here.
                     // @ts-ignore
-                    return interpolateBlues(solutionState.objectiveIdeals?.get(datum.objectiveId) / datum.objectiveValue);
+                    return interpolateBlues(solutionCollection.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue);
             })
             .on('mousemove', tooltipMousemove)
             .on('mouseleave', tooltipMouseleave)
@@ -186,15 +195,26 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
                 tooltipMouseover(); 
                 solutionMouseover(d);
             })
-            //.on('mouseover', solutionMouseover)
             // TODO: figure out how to remove ts-ignore here
             // @ts-ignore
             .call(dragTest);
             
-            /**/
+
+        const tooltip = svgContainer
+            .append('g')
+            .classed('tooltip', true)
+            .style('pointer-events', 'none')
+            .style('visibility', 'hidden')
+            .style('background-color', 'white')
+            .style('border', 'solid')
+            .style('border-width', '2px')
+            .style('border-radius', '5px')
+            .style('padding', '5px')
+            .style('position', 'absolute')
+            // TODO: is this a hack?
+            .style('z-index', 1000);
 
         //const legendColors = [interpolateBlues(1), interpolateBlues(0)];
-        // TODO: what does this actually do?
         //var todoChangeNameOfThis = extent(legendColors, d => d.value);
         /*
 
@@ -241,28 +261,8 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .attr('y', defaultDimensions.height/2 - 64/2)
             .style('fill', 'url(#legendGradient)')
         */
-
-            
-            const tooltip = svgContainer
-            .append('g')
-            .classed('tooltip', true)
-            .style('pointer-events', 'none')
-            .style('visibility', 'hidden')
-            .style('background-color', 'white')
-            .style('border', 'solid')
-            .style('border-width', '2px')
-            .style('border-radius', '5px')
-            .style('padding', '5px')
-            .style('position', 'absolute')
-            // TODO: is this a hack?
-            .style('z-index', 1000);
-            
         }
         
-        
-        
-        
-    //}, [solutionCollection, solutionsState]);
     });
 
     return <div ref={ref} id="container" className="component-container"/>
