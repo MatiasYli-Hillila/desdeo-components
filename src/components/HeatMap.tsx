@@ -47,9 +47,11 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             [solutionState[i], solutionState[j]] = [solutionState[j], solutionState[i]];
             //setSolutionsState(solutionCollection);
         };
+        
+        const svgContainer = select(ref.current);
+        svgContainer.selectAll('*').remove();
 
         for (let i = 0; i < solutionState.length; i++) {
-            const svgContainer = select(ref.current)
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
