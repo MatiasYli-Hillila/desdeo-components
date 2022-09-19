@@ -20,12 +20,28 @@ interface HeatMapProps {
 const HeatMap = ({solutionCollection} : HeatMapProps) => {
     const ref = useRef(null);
 
+    // TODO: pluralize these?
     const [solutionState, setSolutionsState] = useState(solutionCollection.solutions);
+    const [scenarioIdState, setScenarioIdState] = useState(solutionCollection.scenarioIds);
+    const [objectiveIdState, setObjectiveIdState] = useState(solutionCollection.objectiveIds);
 
     useEffect(
         () => {
-        setSolutionsState(solutionCollection.solutions)
-    }, [solutionCollection.solutions]);
+            setSolutionsState(solutionCollection.solutions);
+        }, [solutionCollection.solutions]
+    );
+
+    useEffect(
+        () => {
+            setScenarioIdState(solutionCollection.scenarioIds);
+        }, [solutionCollection.scenarioIds]
+    );
+
+    useEffect(
+        () => {
+            setObjectiveIdState(solutionCollection.objectiveIds);
+        }, [solutionCollection.objectiveIds]
+    );
 
     useEffect(() => {
 
@@ -40,13 +56,29 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             const renderW =
         defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right;
 
+        // TODO: make these into their own object, move to another file, something else?
         var mouseoveredSolutionIndex: number | null = null;
         var currentDraggedSolutionIndex: number | null = null;
+        var mouseoveredScenarioIndex: number | null = null;
+        var currentDraggedScenarioIndex: number | null = null;
 
+        // TODO: generalize the switch functions, they all do the same to different arrays
+        // TODO: rename to maybe swapIndices or something.
+        /**
+         * Swaps indices i, j of solutionState. 
+         */
         const switchSolutions = (i: number, j: number) => {
             [solutionState[i], solutionState[j]] = [solutionState[j], solutionState[i]];
             //setSolutionsState(solutionCollection);
         };
+
+        const swapScenariosIndices = (i: number, j: number) => {
+            [scenarioIdState[i], scenarioIdState[j]] = [scenarioIdState[j], scenarioIdState[i]];
+        }
+
+        const swapObjectiveIndices = (i: number, j: number) => {
+            [objectiveIdState[i], objectiveIdState[j]] = [objectiveIdState[j], objectiveIdState[i]];
+        }
         
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
