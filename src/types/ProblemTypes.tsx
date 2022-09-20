@@ -66,5 +66,6 @@ export type {
   ObjectiveData,
   ObjectiveDatum,
   NavigationData,
+  ScenarioBasedSolution,
   ScenarioBasedSolutionCollection
 };

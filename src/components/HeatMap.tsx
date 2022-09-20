@@ -4,7 +4,7 @@ import { select } from "d3-selection";
 import { scaleBand } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { interpolateBlues } from "d3-scale-chromatic";
-import { ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
+import { ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import { pointer } from "d3-selection";
 import "d3-transition";
 import "./Svg.css";
@@ -24,6 +24,9 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
     const [solutionState, setSolutionsState] = useState(solutionCollection.solutions);
     const [scenarioIdState, setScenarioIdState] = useState(solutionCollection.scenarioIds);
     const [objectiveIdState, setObjectiveIdState] = useState(solutionCollection.objectiveIds);
+
+    //const removedSolutions: ScenarioBasedSolution[] = [];
+    const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
 
     useEffect(
         () => {
@@ -61,6 +64,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         var currentDraggedSolutionIndex: number | null = null;
         var mouseoveredScenarioIndex: number | null = null;
         var currentDraggedScenarioIndex: number | null = null;
+        
 
         // TODO: generalize the switch functions, they all do the same to different arrays
         // TODO: rename to maybe swapIndices or something.
@@ -134,6 +138,10 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             mouseoveredSolutionIndex = solutionIndex;
         };
 
+        const scenarioMouseover = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+        }
+
         // TODO: see if this can be done without eslint-disable 
         // eslint-disable-next-line no-loop-func
         const dragStart = (wut: any) => {
@@ -155,10 +163,13 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             console.log(solutionId);
             if (solutionState.length > 1) {
                 const solutionToRemoveIndex = solutionState.findIndex(i => i.solutionId === solutionId);
+                const solutionToRemove = solutionState[solutionToRemoveIndex];
                 setSolutionsState([
                     ...solutionState.slice(0, solutionToRemoveIndex),
                     ...solutionState.slice(solutionToRemoveIndex + 1, solutionState.length)
                 ]);
+                removedSolutionsState.push(solutionToRemove);
+                setRemovedSolutionsState(removedSolutionsState);
             }
         }
 
@@ -232,7 +243,18 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             // TODO: figure out how to remove ts-ignore here
             // @ts-ignore
             .call(dragTest);
-            
+        
+        const test = svgContainer.append('g')
+            .attr("transform", `translate(${defaultDimensions.margin.left},${defaultDimensions.height + defaultDimensions.margin.top})`)
+            .append('ul'); 
+
+        test//.selectAll()
+            .selectAll('li')
+            .data(removedSolutionsState)
+            .enter()
+            .append('li')
+            .text(d => d.solutionId);
+//.text('asdf')
 
         const tooltip = svgContainer
             .append('g')
