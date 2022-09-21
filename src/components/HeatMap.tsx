@@ -25,7 +25,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
     const [scenarioIdState, setScenarioIdState] = useState(solutionCollection.scenarioIds);
     const [objectiveIdState, setObjectiveIdState] = useState(solutionCollection.objectiveIds);
 
-    //const removedSolutions: ScenarioBasedSolution[] = [];
+    // TODO: why does the list of removed solutions show the same solution twice on first removal?
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
 
     useEffect(
@@ -168,9 +168,27 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
                     ...solutionState.slice(0, solutionToRemoveIndex),
                     ...solutionState.slice(solutionToRemoveIndex + 1, solutionState.length)
                 ]);
-                removedSolutionsState.push(solutionToRemove);
-                setRemovedSolutionsState(removedSolutionsState);
+                //removedSolutionsState.push(solutionToRemove);
+                setRemovedSolutionsState(state => [...state, solutionToRemove]);
             }
+        }
+
+        const addSolutionBack = (event: MouseEvent) => {
+            const eventTarget = event.target as HTMLElement;
+            console.log('addSolutionBack');
+            const solutionToAddBackIndex = removedSolutionsState.findIndex(i => i.solutionId === eventTarget.textContent);
+            const solutionToAddBack = removedSolutionsState[solutionToAddBackIndex];
+            if (solutionToAddBack !== null && solutionToAddBack !== undefined)
+            {
+                setSolutionsState(state => [...state, solutionToAddBack]);
+                setRemovedSolutionsState([
+                    ...removedSolutionsState.slice(0, solutionToAddBackIndex),
+                    ...removedSolutionsState.slice(solutionToAddBackIndex + 1, removedSolutionsState.length)
+                ]);
+            }
+            //solutionState.push(event.target.__data__);
+            //removedSolutionsState.splice
+            //setSolutionsState(solutionState);
         }
 
         const dragTest = drag()
@@ -253,6 +271,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .data(removedSolutionsState)
             .enter()
             .append('li')
+            .on('click', mouseEvent => addSolutionBack(mouseEvent))
             .text(d => d.solutionId);
 //.text('asdf')
 
