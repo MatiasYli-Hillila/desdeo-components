@@ -119,11 +119,11 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
                 else if (solutionCollection.objectivesToMaximize.get(datum.objectiveId))
                     // TODO: figure out how to remove ts-ignore here
                     // @ts-ignore
-                    percentOfIdealString = `solution/ideal (maximizing): ${(datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId)).toFixed(2)}`;
+                    percentOfIdealString = `goodness% (maximizing): ${(datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId)).toFixed(2)}`;
                 else 
                     // TODO: figure out how to remove ts-ignore here
                     // @ts-ignore
-                    percentOfIdealString = `ideal/solution (minimizing): ${(solutionCollection.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
+                    percentOfIdealString = `goodness% (minimizing): ${(solutionCollection.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
                 tooltip
                     .html(`Value: ${datum.objectiveValue.toString()}; ${percentOfIdealString}`)
                     .style('left', `${x+20}px`)
@@ -178,16 +178,20 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .on('start', dragStart)
             .on('end', dragEnd);
 
-
+        // TODO: see if this can be done without eslint-disable 
+        // eslint-disable-next-line no-loop-func
         const scenarioDragStart = (event: MouseEvent) => {
+            // TODO: figure out how to remove ts-ignore here
+            // @ts-ignore
             const scenarioId = event.sourceEvent.target.classList.value;
             const scenarioIndex = scenarioIdState.findIndex(i => i === scenarioId);
             currentDraggedScenarioIndex = scenarioIndex;
             console.log(`currentDraggedScenarioIndex: ${currentDraggedScenarioIndex}`);
         }
 
+        // TODO: see if this can be done without eslint-disable 
+        // eslint-disable-next-line no-loop-func
         const scenarioDragEnd = () => {
-
             if (mouseoveredScenarioIndex === null || currentDraggedScenarioIndex === null) return;
             // TODO: swap the order of the parameters in this call
             else swapScenariosIndices(currentDraggedScenarioIndex, mouseoveredScenarioIndex);
@@ -245,6 +249,8 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .selectAll('text')
             .attr('class', d => d)
             .on('mouseover', scenarioMouseover)
+            // TODO: figure out how to remove ts-ignore here
+            // @ts-ignore
             .call(scenarioDrag);
 
         const yScale = scaleBand()
@@ -286,14 +292,21 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .style('fill', datum => {
                 if (solutionCollection.objectivesToMaximize.get(datum.objectiveId)) 
                     // TODO: calculate solutions.objectiveIdeals from the biggest/smallest value if not provided
-                    // TODO: fix these calculations
-                    // TODO: figure out how to remove ts-ignore here.
-                    // @ts-ignore
-                    return interpolateBlues(datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId));
+                    // TODO: use Math.abs instead
+                    return interpolateBlues(
+                        // TODO: figure out how to remove ts-ignore here.
+                        // @ts-ignore
+                        (datum.objectiveValue - solutionCollection.objectiveNadirs.get(datum.objectiveId)) / 
+                        // @ts-ignore
+                        (solutionCollection.objectiveIdeals.get(datum.objectiveId) - solutionCollection.objectiveNadirs.get(datum.objectiveId))
+                    );
                 else 
-                    // TODO: figure out how to remove ts-ignore here.
-                    // @ts-ignore
-                    return interpolateBlues(solutionCollection.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue);
+                    return interpolateBlues(
+                        // @ts-ignore
+                        (datum.objectiveValue - solutionCollection.objectiveNadirs.get(datum.objectiveId)) / 
+                        // @ts-ignore
+                        (solutionCollection.objectiveIdeals.get(datum.objectiveId) - solutionCollection.objectiveNadirs.get(datum.objectiveId))
+                    );
             })
             .on('mousemove', tooltipMousemove)
             .on('mouseleave', tooltipMouseleave)
@@ -316,7 +329,6 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .append('li')
             .on('click', mouseEvent => addSolutionBack(mouseEvent))
             .text(d => d.solutionId);
-//.text('asdf')
 
         const tooltip = svgContainer
             .append('g')
@@ -332,6 +344,8 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             // TODO: is this a hack?
             .style('z-index', 1000);
 
+        //#region legend
+        
         //const legendColors = [interpolateBlues(1), interpolateBlues(0)];
         //var todoChangeNameOfThis = extent(legendColors, d => d.value);
         /*
@@ -379,6 +393,9 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             .attr('y', defaultDimensions.height/2 - 64/2)
             .style('fill', 'url(#legendGradient)')
         */
+
+        //#endregion
+
         }
         
     });

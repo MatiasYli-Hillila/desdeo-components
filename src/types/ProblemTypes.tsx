@@ -55,6 +55,7 @@ type ScenarioBasedSolutionCollection = {
   solutions: ScenarioBasedSolution[];
   objectivesToMaximize: Map<string, boolean>;
   objectiveIdeals: Map<string, number>;
+  objectiveNadirs: Map<string, number>;
   scenarioIds: string[];
   objectiveIds: string[];
 }
@@ -66,6 +67,7 @@ export type {
   ObjectiveData,
   ObjectiveDatum,
   NavigationData,
+  ScenarioBasedObjectiveValue,
   ScenarioBasedSolution,
   ScenarioBasedSolutionCollection
 };
