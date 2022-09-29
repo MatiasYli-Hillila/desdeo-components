@@ -72,8 +72,10 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
          * Swaps indices i, j of solutionState. 
          */
         const switchSolutions = (i: number, j: number) => {
-            [solutionState[i], solutionState[j]] = [solutionState[j], solutionState[i]];
-            //setSolutionsState(solutionCollection);
+            const solutionStateCopy = [...solutionState];
+            [solutionStateCopy[i], solutionStateCopy[j]] = [solutionStateCopy[j], solutionStateCopy[i]];
+            //[solutionState[i], solutionState[j]] = [solutionState[j], solutionState[i]];
+            setSolutionsState(solutionStateCopy);
         };
 
         const swapScenariosIndices = (i: number, j: number) => {
