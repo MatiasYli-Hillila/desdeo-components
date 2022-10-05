@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-//import { useEffect, useRef } from "react";
+
 import { select } from "d3-selection";
 import { scaleBand } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { interpolateBlues } from "d3-scale-chromatic";
-import { ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import { pointer } from "d3-selection";
-import "d3-transition";
-import "./Svg.css";
-//import { extent } from "d3-array";
 import { drag } from "d3-drag";
+import "d3-transition";
+
+import { ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
+import "./Svg.css";
 
 interface HeatMapProps {
     solutionCollection : ScenarioBasedSolutionCollection;
@@ -46,18 +46,18 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         }, [solutionCollection.objectiveIds]
     );
 
+    const defaultDimensions = {
+        width: 300,
+        height: 300,
+        margin: {top: 20, right: 20, bottom: 20, left: 20}
+    }
+
     useEffect(() => {
 
-        const defaultDimensions = {
-            width: 300,
-            height: 300,
-            margin: {top: 80, right: 20, bottom: 20, left: 20}
-        }
+        
 
-        const renderH =
-        defaultDimensions.height + defaultDimensions.margin.bottom + defaultDimensions.margin.top;
-            const renderW =
-        defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right;
+        const renderW = defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right;
+        const renderH = defaultDimensions.height + defaultDimensions.margin.bottom + defaultDimensions.margin.top;
 
         // TODO: make these into their own object, move to another file, something else?
         var mouseoveredSolutionIndex: number | null = null;
@@ -104,8 +104,8 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
             //.attr('preserveAspectRatio', 'xMaxYMax meet')
             //.attr('viewBox', `0 0 ${renderW} ${renderH}`)
             .attr('id', solutionState[i].solutionId)
-            .attr('width', defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right)
-            .attr('height', defaultDimensions.height + defaultDimensions.margin.top + defaultDimensions.margin.bottom)
+            .attr('width', renderW)
+            .attr('height', renderH)
             /*
             .attr(
                 "transform", 
