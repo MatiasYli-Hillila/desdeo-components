@@ -6,9 +6,16 @@
   vertical-align: top;
   overflow: hidden;
 }
+.component-container {
+  position: static;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 100%;
+  vertical-align: top;
+  overflow: visible;
+}
 .svg-content {
-  display: inline-block;
-  position: absolute;
+  float: left;
   top: 0;
   left: 0;
 }

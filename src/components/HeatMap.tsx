@@ -91,16 +91,22 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
         
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
+        svgContainer
+            //.attr('preserveAspectRatio', 'xMidYMid slice')
+            //.attr('viewBox', `0 0 ${renderW/2} ${renderH/2}`)
+            .attr('width', 200)
+            .attr('height', 600);
 
         for (let i = 0; i < solutionState.length; i++) {
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
-            .attr('preserveAspectRatio', 'xMidYMin meet')
-                .attr('viewBox', `0 0 ${renderW} ${renderH}`)
+            //.attr('preserveAspectRatio', 'xMaxYMax meet')
+            //.attr('viewBox', `0 0 ${renderW} ${renderH}`)
             .attr('id', solutionState[i].solutionId)
             .attr('width', defaultDimensions.width + defaultDimensions.margin.left + defaultDimensions.margin.right)
             .attr('height', defaultDimensions.height + defaultDimensions.margin.top + defaultDimensions.margin.bottom)
+            /*
             .attr(
                 "transform", 
                 `translate(
@@ -108,6 +114,7 @@ const HeatMap = ({solutionCollection} : HeatMapProps) => {
                     ${defaultDimensions.margin.top}
                 )`
             );
+            */
 
         const tooltipMouseover = () => {
                 tooltip.style('visibility', 'visible');
