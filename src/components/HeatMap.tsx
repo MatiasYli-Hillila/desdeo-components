@@ -7,7 +7,6 @@ import { interpolateBlues } from "d3-scale-chromatic";
 import { pointer } from "d3-selection";
 import { drag } from "d3-drag";
 import "d3-transition";
-import { extent } from "d3-array";
 
 import { ScenarioBasedObjectiveValue, ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import "./Svg.css";
@@ -25,7 +24,7 @@ interface solutionDimensions {
 
 interface HeatMapProps {
     solutionCollection : ScenarioBasedSolutionCollection;
-    solutionDimensions?: solutionDimensions
+    solutionDimensions?: solutionDimensions;
 };
 
 const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
@@ -44,7 +43,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     // TODO: this goes over column 120, but reindenting breaks if it's not oneliner
     const [solutionDimensionsState, setSolutionDimensionsState] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
-    // TODO: why does the list of removed solutions show the same solution twice on first removal?
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
     const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
     const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
@@ -86,7 +84,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     useEffect(() => setSolutionsState(solutionCollection.solutions), [solutionCollection.solutions]);
     useEffect(() => setScenarioIdsState(solutionCollection.scenarioIds), [solutionCollection.scenarioIds]);
     useEffect(() => setObjectiveIdsState(solutionCollection.objectiveIds), [solutionCollection.objectiveIds]);
-
+    
     // TODO: Make these into their own object, move to another file, something else? Remove useRef? Generalize?
     var mouseoveredSolutionIndex = useRef<number>(null!);
     var currentDraggedSolutionIndex = useRef<number>(null!);
@@ -105,7 +103,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         svgContainer.selectAll('*').remove();
         
         //#region tooltip
-
+        
         const tooltip = svgContainer
         .append('g')
         .classed('tooltip', true)
@@ -118,10 +116,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         .style('padding', '5px')
         .style('position', 'absolute')
         .style('z-index', 1000);
-
+        
         const tooltipMouseover = () => tooltip.style('visibility', 'visible');
         const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
-            
+        
         const tooltipMousemove = (event : MouseEvent, datum : ScenarioBasedObjectiveValue) => {
             const [x,y] = pointer(event);
             var percentOfIdealString = 'goodness% ';
@@ -144,17 +142,17 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .style('left', `${x+20}px`)
             .style('top', `${y-10}px`);
         };
-
+        
         //#endregion
-            
+        
         //#region legend
-                    
+        
         const legendColors = [interpolateBlues(0), interpolateBlues(1)];
-
+        
         const legendSVG = svgContainer.append('svg').classed('svg-content', true)
-        .attr('width', 100)
+        .attr('width', 100 + 20)
         .attr('height', 400);
-                    
+        
         const legendGradient = legendSVG.append('defs')
         .append('linearGradient')
         .attr('id', 'legendGradient')
@@ -185,26 +183,72 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         //.attr('x', solutionDimensionsState.width + solutionDimensionsState.margin.right)
         //.attr('y', solutionDimensionsState.height/2 - 64/2)
         .style('fill', 'url(#legendGradient)')
-
-
-        legendSVG.append('text')
-            .attr("x", 50)             
-            .attr("y", 20)
-            .style("text-anchor", "middle") 
-            .style("font-size", "16px") 
-            .text(() => 'ideal')
-            .style('fill', legendColors[0])
-
+        
+        
         legendSVG.append('text')
         .attr("x", 50)             
-            .attr("y", 390)
-            .style("text-anchor", "middle") 
-            .style("font-size", "16px") 
-            .text(() => 'nadir')
-            .style('fill', legendColors[1])
+        .attr("y", 20)
+        .style("text-anchor", "middle") 
+        .style("font-size", "16px") 
+        .text(() => 'ideal')
+        .style('fill', legendColors[0])
+        
+        legendSVG.append('text')
+        .attr("x", 50)             
+        .attr("y", 390)
+        .style("text-anchor", "middle") 
+        .style("font-size", "16px") 
+        .text(() => 'nadir')
+        .style('fill', legendColors[1])
         
         //#endregion
+        
+        //#region removed solutions list
 
+        const addSolutionBack = (event: MouseEvent) => {
+            const eventTarget = event.target as HTMLElement;
+            console.log('addSolutionBack');
+            const solutionToAddBackIndex = removedSolutionsState.findIndex(i => i.solutionId === eventTarget.textContent);
+            const solutionToAddBack = removedSolutionsState[solutionToAddBackIndex];
+            if (solutionToAddBack !== null && solutionToAddBack !== undefined)
+            {
+                setSolutionsState(state => [...state, solutionToAddBack]);
+                setRemovedSolutionsState([
+                    ...removedSolutionsState.slice(0, solutionToAddBackIndex),
+                    ...removedSolutionsState.slice(solutionToAddBackIndex + 1, removedSolutionsState.length)
+                ]);
+            }
+        };
+        
+        // TODO: Use different class? Make this work better (i.e. margins)
+        const removedSolutionsList = svgContainer.append('g').classed('svg-content', true)
+        //.attr('transform', `translate(${solutionDimensionsState.margin.left}, 0`)
+        //.attr("transform", `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
+        //.attr('x', 50)
+        .attr('width', 100)
+        .attr('height', 400)
+        .append('text')
+        .attr('x', 50)
+        .attr('y', 20)
+        .style('text-anchor', 'middle')
+        .style('font-size', '16px')
+        .text(() => 'Removed solutions')
+        .style('fill', 'black')
+        .append('ul')
+        //.attr('width', 100)
+        //.attr('height', 400)
+        //.attr('x', 0)
+        .attr('y', 50);
+        
+        removedSolutionsList.selectAll('li')
+        .data(removedSolutionsState)
+        .enter()
+        .append('li')
+        .on('click', mouseEvent => addSolutionBack(mouseEvent))
+        .text(d => d.solutionId);
+        
+        //#endregion
+        
         for (let i = 0; i < solutionsState.length; i++) {
             const svg = svgContainer
             .append('svg')
@@ -259,25 +303,25 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             const scenarioDrag = drag()
             .on('start', scenarioDragStart)
             .on('end', scenarioDragEnd);
-
+            
             const objectiveMouseover = (event: MouseEvent) => {
                 var target = event.target as HTMLElement;
                 const objectiveId = target.classList.value;
                 const objectiveIndex = objectiveIdsState.findIndex(i => i === objectiveId);
                 mouseoveredObjectiveIndex.current = objectiveIndex;
             };
-
+            
             const objectiveDragStart = (dragStartObject: any) => {
                 const objectiveId = dragStartObject.sourceEvent.target.classList.value;
                 const objectiveIndex = objectiveIdsState.findIndex(i => i === objectiveId);
                 currentDraggedObjectiveIndex.current = objectiveIndex;
             };
-
+            
             const objectiveDragEnd = () => {
                 if (mouseoveredObjectiveIndex.current === null || currentDraggedObjectiveIndex.current === null) return;
                 else swapObjectiveIndices(mouseoveredObjectiveIndex.current, currentDraggedObjectiveIndex.current);
             };
-
+            
             const objectiveDrag = drag()
             .on('start', objectiveDragStart)
             .on('end', objectiveDragEnd);
@@ -297,20 +341,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 }
             }
             
-            const addSolutionBack = (event: MouseEvent) => {
-                const eventTarget = event.target as HTMLElement;
-                console.log('addSolutionBack');
-                const solutionToAddBackIndex = removedSolutionsState.findIndex(i => i.solutionId === eventTarget.textContent);
-                const solutionToAddBack = removedSolutionsState[solutionToAddBackIndex];
-                if (solutionToAddBack !== null && solutionToAddBack !== undefined)
-                {
-                    setSolutionsState(state => [...state, solutionToAddBack]);
-                    setRemovedSolutionsState([
-                        ...removedSolutionsState.slice(0, solutionToAddBackIndex),
-                        ...removedSolutionsState.slice(solutionToAddBackIndex + 1, removedSolutionsState.length)
-                    ]);
-                }
-            }
+            
             
             const xScale = scaleBand()
             .range([0, solutionDimensionsState.width])
@@ -335,7 +366,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .domain(objectiveIdsState)
             .padding(0.01);
             const yAxis = axisLeft(yScale);
-
+            
             // TODO: refactor ts-ignore away
             // @ts-ignore
             svg.append("g")
@@ -401,22 +432,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     // TODO: refactor ts-ignore away
                     // @ts-ignore
                     .call(solutionDrag);
-                    
-                    const test = svgContainer.append('g')
-                    .attr("transform", `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
-                    .append('ul'); 
-                    
-                    test//.selectAll()
-                    .selectAll('li')
-                    .data(removedSolutionsState)
-                    .enter()
-                    .append('li')
-                    .on('click', mouseEvent => addSolutionBack(mouseEvent))
-                    .text(d => d.solutionId);
-                    
-                    
-                    
-                }
+        };
                 
     });
             
