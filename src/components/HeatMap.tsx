@@ -85,19 +85,18 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     useEffect(() => setSolutionsState(solutionCollection.solutions), [solutionCollection.solutions]);
     useEffect(() => setScenarioIdsState(solutionCollection.scenarioIds), [solutionCollection.scenarioIds]);
     useEffect(() => setObjectiveIdsState(solutionCollection.objectiveIds), [solutionCollection.objectiveIds]);
+
+    // TODO: Make these into their own object, move to another file, something else? Remove useRef?
+    var mouseoveredSolutionIndex = useRef<number>(null!);
+    var currentDraggedSolutionIndex = useRef<number>(null!);
+    var mouseoveredScenarioIndex = useRef<number>(null!);
+    var currentDraggedScenarioIndex = useRef<number>(null!);
     
     /* Render the component */
     useEffect(() => {
         
         const renderW = solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
         const renderH = solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
-        
-        // TODO: make these into their own object, move to another file, something else?
-        var mouseoveredSolutionIndex: number | null = null;
-        var currentDraggedSolutionIndex: number | null = null;
-        
-        var mouseoveredScenarioIndex: number | null = null;
-        var currentDraggedScenarioIndex: number | null = null;
         
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
@@ -155,63 +154,45 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             
             
             // TODO: refactor mouseover functions to be more general, they have copypasted code
-            
-            // TODO: see if this can be done without eslint-disable 
-            // eslint-disable-next-line no-loop-func
             const solutionMouseover = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;
                 const solutionId = target.classList.value;
                 const solutionIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
-                mouseoveredSolutionIndex = solutionIndex;
+                mouseoveredSolutionIndex.current = solutionIndex;
             };
             
-            // TODO: see if this can be done without eslint-disable 
-            // eslint-disable-next-line no-loop-func
-            const solutionDragStart = (wut: any) => {
-                const solutionId = wut.sourceEvent.target.classList.value;
+            const solutionDragStart = (dragStartobject: any) => {
+                const solutionId = dragStartobject.sourceEvent.target.classList.value;
                 const solutionIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
-                currentDraggedSolutionIndex = solutionIndex;
+                currentDraggedSolutionIndex.current = solutionIndex;
             }
             
-            //const dragEnd = (event: any) => {
-            // TODO: see if this can be done without eslint-disable 
-            // eslint-disable-next-line no-loop-func
             const solutionDragEnd = () => {
-                if (mouseoveredSolutionIndex === null || currentDraggedSolutionIndex === null) return;
-                else swapSolutions(currentDraggedSolutionIndex, mouseoveredSolutionIndex);
+                if (mouseoveredSolutionIndex.current === null || currentDraggedSolutionIndex.current === null) return;
+                else swapSolutions(currentDraggedSolutionIndex.current, mouseoveredSolutionIndex.current);
             }
             
             const solutionDrag = drag()
             .on('start', solutionDragStart)
             .on('end', solutionDragEnd);
             
-            // TODO: see if this can be done without eslint-disable 
-            // eslint-disable-next-line no-loop-func
             const scenarioMouseover = (event: MouseEvent) => {
                 var target = event.target as HTMLElement;
                 const scenarioId = target.classList.value;
                 const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
-                mouseoveredScenarioIndex = scenarioIndex;
-                console.log(`mouseoveredScenarioIndex: ${mouseoveredScenarioIndex}`);
+                mouseoveredScenarioIndex.current = scenarioIndex;
             }
             
-            // TODO: see if this can be done without eslint-disable 
-            // eslint-disable-next-line no-loop-func
-            const scenarioDragStart = (event: MouseEvent) => {
-                // TODO: figure out how to remove ts-ignore here
-                // @ts-ignore
+            const scenarioDragStart = (event: any) => {
                 const scenarioId = event.sourceEvent.target.classList.value;
                 const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
-                currentDraggedScenarioIndex = scenarioIndex;
-                console.log(`currentDraggedScenarioIndex: ${currentDraggedScenarioIndex}`);
+                currentDraggedScenarioIndex.current = scenarioIndex;
             }
             
-            // TODO: see if this can be done without eslint-disable 
-            // eslint-disable-next-line no-loop-func
             const scenarioDragEnd = () => {
-                if (mouseoveredScenarioIndex === null || currentDraggedScenarioIndex === null) return;
+                if (mouseoveredScenarioIndex.current === null || currentDraggedScenarioIndex.current === null) return;
                 // TODO: swap the order of the parameters in this call
-                else swapScenariosIndices(currentDraggedScenarioIndex, mouseoveredScenarioIndex);
+                else swapScenariosIndices(currentDraggedScenarioIndex.current, mouseoveredScenarioIndex.current);
             }
             
             const scenarioDrag = drag()
@@ -229,7 +210,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                         ...solutionsState.slice(0, solutionToRemoveIndex),
                         ...solutionsState.slice(solutionToRemoveIndex + 1, solutionsState.length)
                     ]);
-                    //removedSolutionsState.push(solutionToRemove);
                     setRemovedSolutionsState(state => [...state, solutionToRemove]);
                 }
             }
@@ -255,7 +235,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .padding(0.01);
             const xAxis = axisBottom(xScale);
             
-            // TODO: figure out how to remove ts-ignore here
+            // TODO: refactor ts-ignore away
             // @ts-ignore
             svg.append("g")
             .attr("transform", `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
@@ -263,7 +243,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .selectAll('text')
             .attr('class', d => d)
             .on('mouseover', scenarioMouseover)
-            // TODO: figure out how to remove ts-ignore here
+            // TODO: refactor ts-ignore away
             // @ts-ignore
             .call(scenarioDrag);
             
@@ -287,7 +267,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .style('fill', 'black')
             .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent))
             
-            // TODO: figure out how to remove ts-ignore here
+            // TODO: refactor ts-ignore away
             // @ts-ignore
             svg.selectAll()
             .append('g')
@@ -295,10 +275,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .enter()
             .append('rect')
             .attr('class', solutionsState[i].solutionId)
-            // TODO: figure out how to remove ts-ignore here
+            // TODO: refactor ts-ignore away
             // @ts-ignore
             .attr('x', datum => xScale(datum.scenarioId) + solutionDimensionsState.margin.left)
-            // TODO: figure out how to remove ts-ignore here
+            // TODO: refactor ts-ignore away
             // @ts-ignore
             .attr('y', datum => yScale(datum.objectiveId) + solutionDimensionsState.margin.top)
             .attr('width', xScale.bandwidth())
@@ -308,7 +288,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 // TODO: calculate solutions.objectiveIdeals from the biggest/smallest value if not provided
                 // TODO: use Math.abs instead
                 return interpolateBlues(
-                    // TODO: figure out how to remove ts-ignore here.
+                    // TODO: refactor ts-ignore away.
                     // @ts-ignore
                     (datum.objectiveValue - solutionCollection.objectiveNadirs.get(datum.objectiveId)) / 
                     // @ts-ignore
@@ -328,7 +308,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                         tooltipMouseover(); 
                         solutionMouseover(d);
                     })
-                    // TODO: figure out how to remove ts-ignore here
+                    // TODO: refactor ts-ignore away
                     // @ts-ignore
                     .call(solutionDrag);
                     
