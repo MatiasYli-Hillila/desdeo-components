@@ -7,6 +7,7 @@ import { interpolateBlues } from "d3-scale-chromatic";
 import { pointer } from "d3-selection";
 import { drag } from "d3-drag";
 import "d3-transition";
+import { extent } from "d3-array";
 
 import { ScenarioBasedObjectiveValue, ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import "./Svg.css";
@@ -144,6 +145,64 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
 
         //#endregion
             
+        //#region legend
+                    
+        const legendColors = [interpolateBlues(0), interpolateBlues(1)];
+
+        const legendSVG = svgContainer.append('svg').classed('svg-content', true)
+        .attr('width', 100)
+        .attr('height', 400);
+                    
+        const legendGradient = legendSVG.append('defs')
+        .append('linearGradient')
+        .attr('id', 'legendGradient')
+        .attr('x1', '0%')
+        .attr('x2', '0%')
+        .attr('y1', '0%')
+        .attr('y2', '100%');
+        
+        legendGradient.append('stop')
+        .attr('class', 'start')
+        .attr('offset', '0%')
+        .attr('stop-color', legendColors[1])
+        .attr('stop-opacity', 1);
+        
+        legendGradient.append('stop')
+        .attr('class', 'end')
+        .attr('offset', '100%')
+        .attr('stop-color', legendColors[0])
+        .attr('stop-opacity', 1);
+        
+        legendSVG//.append('g')
+        //.classed('svg-content', true)
+        //.attr('width', renderW)
+        //.attr('height', renderH)
+        .append('rect')
+        .attr('width', 100)
+        .attr('height', 400)
+        //.attr('x', solutionDimensionsState.width + solutionDimensionsState.margin.right)
+        //.attr('y', solutionDimensionsState.height/2 - 64/2)
+        .style('fill', 'url(#legendGradient)')
+
+
+        legendSVG.append('text')
+            .attr("x", 50)             
+            .attr("y", 20)
+            .style("text-anchor", "middle") 
+            .style("font-size", "16px") 
+            .text(() => 'ideal')
+            .style('fill', legendColors[0])
+
+        legendSVG.append('text')
+        .attr("x", 50)             
+            .attr("y", 390)
+            .style("text-anchor", "middle") 
+            .style("font-size", "16px") 
+            .text(() => 'nadir')
+            .style('fill', legendColors[1])
+        
+        //#endregion
+
         for (let i = 0; i < solutionsState.length; i++) {
             const svg = svgContainer
             .append('svg')
@@ -324,57 +383,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     .on('click', mouseEvent => addSolutionBack(mouseEvent))
                     .text(d => d.solutionId);
                     
-                    //#region legend
                     
-                    //const legendColors = [interpolateBlues(1), interpolateBlues(0)];
-                    //var todoChangeNameOfThis = extent(legendColors, d => d.value);
-                    /*
-                    
-                    const legendDimensions = {
-                        width: 28,
-                        height: 84,
-                        margin: {top: 20, right: 20, bottom: 20, left: 20}
-                    };
-                    
-                    const legend = svgContainer
-                    .append('defs')
-                    .append('linearGradient')
-                    */
-                    
-                    /*
-                    const legendGradient = svg.append('defs')
-                    .append('linearGradient')
-                    .attr('id', 'legendGradient')
-                    .attr('x1', '0%')
-                    .attr('x2', '0%')
-                    .attr('y1', '0%')
-                    .attr('y2', '100%');
-                    
-                    legendGradient.append('stop')
-                    .attr('class', 'start')
-                    .attr('offset', '0%')
-                    .attr('stop-color', legendColors[0])
-                    .attr('stop-opacity', 1);
-                    
-                    legendGradient.append('stop')
-                    .attr('class', 'end')
-                    .attr('offset', '100%')
-                    .attr('stop-color', 'blue')
-                    .attr('stop-opacity', 1);
-                    
-                    svg.append('g')
-                    //.selectAll('g')
-                    //.data(legendColors)
-                    //.enter()
-                    .append('rect')
-                    .attr('width', 28)
-                    .attr('height', 64)
-                    .attr('x', solutionDimensionsState.width + solutionDimensionsState.margin.right)
-                    .attr('y', solutionDimensionsState.height/2 - 64/2)
-                    .style('fill', 'url(#legendGradient)')
-                    */
-                    
-                    //#endregion
                     
                 }
                 
