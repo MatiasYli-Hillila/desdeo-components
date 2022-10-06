@@ -47,7 +47,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
     const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
     const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
-
+    
     // TODO: generalize the index swap functions, they all do the same to different arrays
     //#region index swap functions
     
@@ -55,7 +55,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     /**
     * Swaps indices i, j of solutionsState. 
     */
-     const swapSolutions = (i: number, j: number) => {
+    const swapSolutions = (i: number, j: number) => {
         const solutionsStateCopy = [...solutionsState];
         [solutionsStateCopy[i], solutionsStateCopy[j]] = [solutionsStateCopy[j], solutionsStateCopy[i]];
         setSolutionsState(solutionsStateCopy);
@@ -79,7 +79,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         [objectiveIdsStateCopy[i], objectiveIdsStateCopy[j]] = [objectiveIdsStateCopy[j], objectiveIdsStateCopy[i]];
         setObjectiveIdsState(objectiveIdsStateCopy);
     };
-
+    
     //#endregion
     
     useEffect(() => setSolutionsState(solutionCollection.solutions), [solutionCollection.solutions]);
@@ -102,6 +102,19 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
         
+        const tooltip = svgContainer
+        .append('g')
+        .classed('tooltip', true)
+        .style('pointer-events', 'none')
+        .style('visibility', 'hidden')
+        .style('background-color', 'white')
+        .style('border', 'solid')
+        .style('border-width', '2px')
+        .style('border-radius', '5px')
+        .style('padding', '5px')
+        .style('position', 'absolute')
+        .style('z-index', 1000);
+        
         for (let i = 0; i < solutionsState.length; i++) {
             const svg = svgContainer
             .append('svg')
@@ -112,7 +125,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             
             const tooltipMouseover = () => tooltip.style('visibility', 'visible');
             const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
-
+            
             const tooltipMousemove = (event : any, datum : any) => {
                 const [x,y] = pointer(event);
                 var percentOfIdealString = '';
@@ -160,9 +173,9 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             }
             
             const solutionDrag = drag()
-                .on('start', solutionDragStart)
-                .on('end', solutionDragEnd);
-
+            .on('start', solutionDragStart)
+            .on('end', solutionDragEnd);
+            
             // TODO: see if this can be done without eslint-disable 
             // eslint-disable-next-line no-loop-func
             const scenarioMouseover = (event: MouseEvent) => {
@@ -193,8 +206,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             }
             
             const scenarioDrag = drag()
-                .on('start', scenarioDragStart)
-                .on('end', scenarioDragEnd);
+            .on('start', scenarioDragStart)
+            .on('end', scenarioDragEnd);
             
             const removeSolution = (event: MouseEvent) => {
                 const eventTarget = event.target as HTMLElement;
@@ -321,19 +334,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     .append('li')
                     .on('click', mouseEvent => addSolutionBack(mouseEvent))
                     .text(d => d.solutionId);
-                    
-                    const tooltip = svgContainer
-                    .append('g')
-                    .classed('tooltip', true)
-                    .style('pointer-events', 'none')
-                    .style('visibility', 'hidden')
-                    .style('background-color', 'white')
-                    .style('border', 'solid')
-                    .style('border-width', '2px')
-                    .style('border-radius', '5px')
-                    .style('padding', '5px')
-                    .style('position', 'absolute')
-                    .style('z-index', 1000);
                     
                     //#region legend
                     
