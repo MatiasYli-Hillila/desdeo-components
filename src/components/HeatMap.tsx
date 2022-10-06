@@ -87,11 +87,13 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     useEffect(() => setScenarioIdsState(solutionCollection.scenarioIds), [solutionCollection.scenarioIds]);
     useEffect(() => setObjectiveIdsState(solutionCollection.objectiveIds), [solutionCollection.objectiveIds]);
 
-    // TODO: Make these into their own object, move to another file, something else? Remove useRef?
+    // TODO: Make these into their own object, move to another file, something else? Remove useRef? Generalize?
     var mouseoveredSolutionIndex = useRef<number>(null!);
     var currentDraggedSolutionIndex = useRef<number>(null!);
     var mouseoveredScenarioIndex = useRef<number>(null!);
     var currentDraggedScenarioIndex = useRef<number>(null!);
+    var mouseoveredObjectiveIndex = useRef<number>(null!);
+    var currentDraggedObjectiveIndex = useRef<number>(null!);
     
     /* Render the component */
     useEffect(() => {
@@ -211,6 +213,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .attr('width', renderW)
             .attr('height', renderH)
             
+            if (svg === undefined) console.log('svg undefined');
             
             // TODO: refactor mouseover functions to be more general, they have copypasted code
             const solutionMouseover = (event: MouseEvent) => {
@@ -224,12 +227,12 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 const solutionId = dragStartobject.sourceEvent.target.classList.value;
                 const solutionIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
                 currentDraggedSolutionIndex.current = solutionIndex;
-            }
+            };
             
             const solutionDragEnd = () => {
                 if (mouseoveredSolutionIndex.current === null || currentDraggedSolutionIndex.current === null) return;
                 else swapSolutions(currentDraggedSolutionIndex.current, mouseoveredSolutionIndex.current);
-            }
+            };
             
             const solutionDrag = drag()
             .on('start', solutionDragStart)
@@ -240,23 +243,44 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 const scenarioId = target.classList.value;
                 const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
                 mouseoveredScenarioIndex.current = scenarioIndex;
-            }
+            };
             
-            const scenarioDragStart = (event: any) => {
-                const scenarioId = event.sourceEvent.target.classList.value;
+            const scenarioDragStart = (dragStartObject: any) => {
+                const scenarioId = dragStartObject.sourceEvent.target.classList.value;
                 const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
                 currentDraggedScenarioIndex.current = scenarioIndex;
-            }
+            };
             
             const scenarioDragEnd = () => {
                 if (mouseoveredScenarioIndex.current === null || currentDraggedScenarioIndex.current === null) return;
-                // TODO: swap the order of the parameters in this call
-                else swapScenariosIndices(currentDraggedScenarioIndex.current, mouseoveredScenarioIndex.current);
-            }
+                else swapScenariosIndices(mouseoveredScenarioIndex.current, currentDraggedScenarioIndex.current);
+            };
             
             const scenarioDrag = drag()
             .on('start', scenarioDragStart)
             .on('end', scenarioDragEnd);
+
+            const objectiveMouseover = (event: MouseEvent) => {
+                var target = event.target as HTMLElement;
+                const objectiveId = target.classList.value;
+                const objectiveIndex = objectiveIdsState.findIndex(i => i === objectiveId);
+                mouseoveredObjectiveIndex.current = objectiveIndex;
+            };
+
+            const objectiveDragStart = (dragStartObject: any) => {
+                const objectiveId = dragStartObject.sourceEvent.target.classList.value;
+                const objectiveIndex = objectiveIdsState.findIndex(i => i === objectiveId);
+                currentDraggedObjectiveIndex.current = objectiveIndex;
+            };
+
+            const objectiveDragEnd = () => {
+                if (mouseoveredObjectiveIndex.current === null || currentDraggedObjectiveIndex.current === null) return;
+                else swapObjectiveIndices(mouseoveredObjectiveIndex.current, currentDraggedObjectiveIndex.current);
+            };
+
+            const objectiveDrag = drag()
+            .on('start', objectiveDragStart)
+            .on('end', objectiveDragEnd);
             
             const removeSolution = (event: MouseEvent) => {
                 const eventTarget = event.target as HTMLElement;
@@ -308,14 +332,21 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             
             const yScale = scaleBand()
             .range([solutionDimensionsState.height, 0])
-            .domain(solutionCollection.objectiveIds)
+            .domain(objectiveIdsState)
             .padding(0.01);
             const yAxis = axisLeft(yScale);
+
+            // TODO: refactor ts-ignore away
+            // @ts-ignore
             svg.append("g")
             .attr('transform', `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.margin.top})`)
-            .call(yAxis);
-            
-            if (svg === undefined) console.log('svg undefined');
+            .call(yAxis)
+            .selectAll('text')
+            .attr('class', d => d)
+            .on('mouseover', objectiveMouseover)
+            // TODO: refactor ts-ignore away
+            // @ts-ignore
+            .call(objectiveDrag);
             
             svg.append('text')
             .attr("x", (solutionDimensionsState.width / 2))             
