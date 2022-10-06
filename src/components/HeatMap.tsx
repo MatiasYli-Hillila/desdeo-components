@@ -39,10 +39,40 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             left: 80
         }
     };
-
-    const [solutionDimensionsState, setSolutionDimensionsState] = useState(
-        solutionDimensions ? solutionDimensions : solutionDefaultDimensions
-    );
+    
+    // TODO: generalize the switch functions, they all do the same to different arrays
+    // TODO: rename swapSolutions to swapSolutionIndices
+    /**
+    * Swaps indices i, j of solutionsState. 
+    */
+    const swapSolutions = (i: number, j: number) => {
+        const solutionsStateCopy = [...solutionsState];
+        [solutionsStateCopy[i], solutionsStateCopy[j]] = [solutionsStateCopy[j], solutionsStateCopy[i]];
+        //[solutionsState[i], solutionsState[j]] = [solutionsState[j], solutionsState[i]];
+        setSolutionsState(solutionsStateCopy);
+    };
+    
+    // TODO: rename swapScenariosIndices to swapScenarioIndices
+    /**
+    * Swaps indices i, j of scenarioIdsState.
+    */
+    const swapScenariosIndices = (i: number, j: number) => {
+        const scenarioIdsStateCopy = [...scenarioIdsState];
+        [scenarioIdsStateCopy[i], scenarioIdsStateCopy[j]] = [scenarioIdsStateCopy[j], scenarioIdsStateCopy[i]];
+        setScenarioIdsState(scenarioIdsStateCopy);
+    };
+    
+    /**
+    * Swaps indices i, j of objectiveIdsState.
+    */
+    const swapObjectiveIndices = (i: number, j: number) => {
+        const objectiveIdsStateCopy = [...objectiveIdsState];
+        [objectiveIdsStateCopy[i], objectiveIdsStateCopy[j]] = [objectiveIdsStateCopy[j], objectiveIdsStateCopy[i]];
+        setObjectiveIdsState(objectiveIdsStateCopy);
+    };
+    
+    // TODO: this goes over column 120, but reindenting breaks if it's not oneliner
+    const [solutionDimensionsState, setSolutionDimensionsState] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
     
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
     // TODO: why does the list of removed solutions show the same solution twice on first removal?
@@ -64,38 +94,9 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         // TODO: make these into their own object, move to another file, something else?
         var mouseoveredSolutionIndex: number | null = null;
         var currentDraggedSolutionIndex: number | null = null;
-
+        
         var mouseoveredScenarioIndex: number | null = null;
         var currentDraggedScenarioIndex: number | null = null;
-        
-        
-        // TODO: generalize the switch functions, they all do the same to different arrays
-        // TODO: rename to maybe swapIndices or something.
-        /**
-        * Swaps indices i, j of solutionsState. 
-        */
-        const swapSolutions = (i: number, j: number) => {
-            const solutionsStateCopy = [...solutionsState];
-            [solutionsStateCopy[i], solutionsStateCopy[j]] = [solutionsStateCopy[j], solutionsStateCopy[i]];
-            //[solutionsState[i], solutionsState[j]] = [solutionsState[j], solutionsState[i]];
-            setSolutionsState(solutionsStateCopy);
-        };
-        
-        /**
-        * Swaps indices i, j of scenarioIdsState.
-        */
-        const swapScenariosIndices = (i: number, j: number) => {
-            const scenarioIdsStateCopy = [...scenarioIdsState];
-            [scenarioIdsStateCopy[i], scenarioIdsStateCopy[j]] = [scenarioIdsStateCopy[j], scenarioIdsStateCopy[i]];
-            setScenarioIdsState(scenarioIdsStateCopy);
-        }
-        
-        /**
-        * Swaps indices i, j of objectiveIdsState.
-        */
-        const swapObjectiveIndices = (i: number, j: number) => {
-            [objectiveIdsState[i], objectiveIdsState[j]] = [objectiveIdsState[j], objectiveIdsState[i]];
-        }
         
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
