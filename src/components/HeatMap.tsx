@@ -146,18 +146,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             
             // TODO: see if this can be done without eslint-disable 
             // eslint-disable-next-line no-loop-func
-            const scenarioMouseover = (event: MouseEvent) => {
-                var target = event.target as HTMLElement;
-                const scenarioId = target.classList.value;
-                const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
-                mouseoveredScenarioIndex = scenarioIndex;
-                console.log(`mouseoveredScenarioIndex: ${mouseoveredScenarioIndex}`);
-            }
-            
-            // TODO: see if this can be done without eslint-disable 
-            // TODO: rename wut, and dragStart to solutionDragStart or something
-            // eslint-disable-next-line no-loop-func
-            const dragStart = (wut: any) => {
+            const solutionDragStart = (wut: any) => {
                 const solutionId = wut.sourceEvent.target.classList.value;
                 const solutionIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
                 currentDraggedSolutionIndex = solutionIndex;
@@ -165,17 +154,25 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             
             //const dragEnd = (event: any) => {
             // TODO: see if this can be done without eslint-disable 
-            // TODO: rename dragEnd to solutionDragEnd or something
             // eslint-disable-next-line no-loop-func
-            const dragEnd = () => {
+            const solutionDragEnd = () => {
                 if (mouseoveredSolutionIndex === null || currentDraggedSolutionIndex === null) return;
                 else swapSolutions(currentDraggedSolutionIndex, mouseoveredSolutionIndex);
             }
             
-            // TODO: rename dragTest to solutionDrag or something
-            const dragTest = drag()
-            .on('start', dragStart)
-            .on('end', dragEnd);
+            const solutionDrag = drag()
+                .on('start', solutionDragStart)
+                .on('end', solutionDragEnd);
+
+            // TODO: see if this can be done without eslint-disable 
+            // eslint-disable-next-line no-loop-func
+            const scenarioMouseover = (event: MouseEvent) => {
+                var target = event.target as HTMLElement;
+                const scenarioId = target.classList.value;
+                const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
+                mouseoveredScenarioIndex = scenarioIndex;
+                console.log(`mouseoveredScenarioIndex: ${mouseoveredScenarioIndex}`);
+            }
             
             // TODO: see if this can be done without eslint-disable 
             // eslint-disable-next-line no-loop-func
@@ -197,8 +194,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             }
             
             const scenarioDrag = drag()
-            .on('start', scenarioDragStart)
-            .on('end', scenarioDragEnd);
+                .on('start', scenarioDragStart)
+                .on('end', scenarioDragEnd);
             
             const removeSolution = (event: MouseEvent) => {
                 const eventTarget = event.target as HTMLElement;
@@ -312,7 +309,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     })
                     // TODO: figure out how to remove ts-ignore here
                     // @ts-ignore
-                    .call(dragTest);
+                    .call(solutionDrag);
                     
                     const test = svgContainer.append('g')
                     .attr("transform", `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
