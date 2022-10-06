@@ -8,7 +8,7 @@ import { pointer } from "d3-selection";
 import { drag } from "d3-drag";
 import "d3-transition";
 
-import { ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
+import { ScenarioBasedObjectiveValue, ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
 import "./Svg.css";
 
 interface solutionDimensions {
@@ -102,6 +102,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
         
+        //#region tooltip
+
         const tooltip = svgContainer
         .append('g')
         .classed('tooltip', true)
@@ -114,7 +116,35 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         .style('padding', '5px')
         .style('position', 'absolute')
         .style('z-index', 1000);
-        
+
+        const tooltipMouseover = () => tooltip.style('visibility', 'visible');
+        const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
+            
+        const tooltipMousemove = (event : MouseEvent, datum : ScenarioBasedObjectiveValue) => {
+            const [x,y] = pointer(event);
+            var percentOfIdealString = 'goodness% ';
+            if (solutionCollection.objectiveIdeals === undefined) return;
+            else if (solutionCollection.objectivesToMaximize.get(datum.objectiveId))
+            {
+                percentOfIdealString += `(maximizing): ${
+                    (datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId)!).toFixed(2)
+                }`;
+            }
+            
+            else 
+            {
+                percentOfIdealString += `(minimizing): ${(
+                    solutionCollection.objectiveIdeals.get(datum.objectiveId)! / datum.objectiveValue).toFixed(2)
+                }`;
+            }
+            tooltip
+            .html(`Value: ${datum.objectiveValue.toString()}</br> ${percentOfIdealString}`)
+            .style('left', `${x+20}px`)
+            .style('top', `${y-10}px`);
+        };
+
+        //#endregion
+            
         for (let i = 0; i < solutionsState.length; i++) {
             const svg = svgContainer
             .append('svg')
@@ -123,27 +153,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .attr('width', renderW)
             .attr('height', renderH)
             
-            const tooltipMouseover = () => tooltip.style('visibility', 'visible');
-            const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
-            
-            const tooltipMousemove = (event : any, datum : any) => {
-                const [x,y] = pointer(event);
-                var percentOfIdealString = '';
-                if (solutionCollection.objectiveIdeals.get(datum.objectiveId) === undefined) return;
-                else if (solutionCollection.objectivesToMaximize.get(datum.objectiveId))
-                // TODO: figure out how to remove ts-ignore here
-                // @ts-ignore
-                percentOfIdealString = `goodness% (maximizing): ${(datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId)).toFixed(2)}`;
-                else 
-                // TODO: figure out how to remove ts-ignore here
-                // @ts-ignore
-                percentOfIdealString = `goodness% (minimizing): ${(solutionCollection.objectiveIdeals.get(datum.objectiveId) / datum.objectiveValue).toFixed(2)}`;
-                tooltip
-                .html(`Value: ${datum.objectiveValue.toString()}; ${percentOfIdealString}`)
-                .style('left', `${x+20}px`)
-                .style('top', `${y-10}px`);
-                //.attr('transform', `translate(${x},${y})`);
-            };
             
             // TODO: refactor mouseover functions to be more general, they have copypasted code
             
@@ -389,9 +398,9 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     
                 }
                 
-            });
+    });
             
-            return <div ref={ref} id="container" className="component-container"/>
-        }; 
+    return <div ref={ref} id="container" className="component-container"/>
+}; 
         
-        export default HeatMap;
+export default HeatMap;
