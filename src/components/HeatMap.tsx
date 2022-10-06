@@ -40,15 +40,24 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         }
     };
     
-    // TODO: generalize the switch functions, they all do the same to different arrays
+    // TODO: this goes over column 120, but reindenting breaks if it's not oneliner
+    const [solutionDimensionsState, setSolutionDimensionsState] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
+    const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
+    // TODO: why does the list of removed solutions show the same solution twice on first removal?
+    const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
+    const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
+    const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
+
+    // TODO: generalize the index swap functions, they all do the same to different arrays
+    //#region index swap functions
+    
     // TODO: rename swapSolutions to swapSolutionIndices
     /**
     * Swaps indices i, j of solutionsState. 
     */
-    const swapSolutions = (i: number, j: number) => {
+     const swapSolutions = (i: number, j: number) => {
         const solutionsStateCopy = [...solutionsState];
         [solutionsStateCopy[i], solutionsStateCopy[j]] = [solutionsStateCopy[j], solutionsStateCopy[i]];
-        //[solutionsState[i], solutionsState[j]] = [solutionsState[j], solutionsState[i]];
         setSolutionsState(solutionsStateCopy);
     };
     
@@ -70,16 +79,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         [objectiveIdsStateCopy[i], objectiveIdsStateCopy[j]] = [objectiveIdsStateCopy[j], objectiveIdsStateCopy[i]];
         setObjectiveIdsState(objectiveIdsStateCopy);
     };
-    
-    // TODO: this goes over column 120, but reindenting breaks if it's not oneliner
-    const [solutionDimensionsState, setSolutionDimensionsState] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
-    
-    const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
-    // TODO: why does the list of removed solutions show the same solution twice on first removal?
-    const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
-    const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
-    const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
-    
+
+    //#endregion
     
     useEffect(() => setSolutionsState(solutionCollection.solutions), [solutionCollection.solutions]);
     useEffect(() => setScenarioIdsState(solutionCollection.scenarioIds), [solutionCollection.scenarioIds]);
@@ -109,9 +110,9 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .attr('width', renderW)
             .attr('height', renderH)
             
-            const tooltipMouseover = () => {
-                tooltip.style('visibility', 'visible');
-            };
+            const tooltipMouseover = () => tooltip.style('visibility', 'visible');
+            const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
+
             const tooltipMousemove = (event : any, datum : any) => {
                 const [x,y] = pointer(event);
                 var percentOfIdealString = '';
@@ -130,8 +131,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 .style('top', `${y-10}px`);
                 //.attr('transform', `translate(${x},${y})`);
             };
-            
-            const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
             
             // TODO: refactor mouseover functions to be more general, they have copypasted code
             
@@ -334,7 +333,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     .style('border-radius', '5px')
                     .style('padding', '5px')
                     .style('position', 'absolute')
-                    // TODO: is this a hack?
                     .style('z-index', 1000);
                     
                     //#region legend
