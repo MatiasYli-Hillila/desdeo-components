@@ -44,17 +44,16 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         solutionDimensions ? solutionDimensions : solutionDefaultDimensions
     );
     
-    // TODO: pluralize these?
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
     // TODO: why does the list of removed solutions show the same solution twice on first removal?
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
-    const [scenarioIdState, setScenarioIdState] = useState(solutionCollection.scenarioIds);
-    const [objectiveIdState, setObjectiveIdState] = useState(solutionCollection.objectiveIds);
+    const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
+    const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
     
     
     useEffect(() => setSolutionsState(solutionCollection.solutions), [solutionCollection.solutions]);
-    useEffect(() => setScenarioIdState(solutionCollection.scenarioIds), [solutionCollection.scenarioIds]);
-    useEffect(() => setObjectiveIdState(solutionCollection.objectiveIds), [solutionCollection.objectiveIds]);
+    useEffect(() => setScenarioIdsState(solutionCollection.scenarioIds), [solutionCollection.scenarioIds]);
+    useEffect(() => setObjectiveIdsState(solutionCollection.objectiveIds), [solutionCollection.objectiveIds]);
     
     /* Render the component */
     useEffect(() => {
@@ -83,19 +82,19 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         };
         
         /**
-        * Swaps indices i, j of scenarioIdState.
+        * Swaps indices i, j of scenarioIdsState.
         */
         const swapScenariosIndices = (i: number, j: number) => {
-            const scenarioIdStateCopy = [...scenarioIdState];
-            [scenarioIdStateCopy[i], scenarioIdStateCopy[j]] = [scenarioIdStateCopy[j], scenarioIdStateCopy[i]];
-            setScenarioIdState(scenarioIdStateCopy);
+            const scenarioIdsStateCopy = [...scenarioIdsState];
+            [scenarioIdsStateCopy[i], scenarioIdsStateCopy[j]] = [scenarioIdsStateCopy[j], scenarioIdsStateCopy[i]];
+            setScenarioIdsState(scenarioIdsStateCopy);
         }
         
         /**
-        * Swaps indices i, j of objectiveIdState.
+        * Swaps indices i, j of objectiveIdsState.
         */
         const swapObjectiveIndices = (i: number, j: number) => {
-            [objectiveIdState[i], objectiveIdState[j]] = [objectiveIdState[j], objectiveIdState[i]];
+            [objectiveIdsState[i], objectiveIdsState[j]] = [objectiveIdsState[j], objectiveIdsState[i]];
         }
         
         const svgContainer = select(ref.current);
@@ -149,7 +148,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             const scenarioMouseover = (event: MouseEvent) => {
                 var target = event.target as HTMLElement;
                 const scenarioId = target.classList.value;
-                const scenarioIndex = scenarioIdState.findIndex(i => i === scenarioId);
+                const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
                 mouseoveredScenarioIndex = scenarioIndex;
                 console.log(`mouseoveredScenarioIndex: ${mouseoveredScenarioIndex}`);
             }
@@ -183,7 +182,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 // TODO: figure out how to remove ts-ignore here
                 // @ts-ignore
                 const scenarioId = event.sourceEvent.target.classList.value;
-                const scenarioIndex = scenarioIdState.findIndex(i => i === scenarioId);
+                const scenarioIndex = scenarioIdsState.findIndex(i => i === scenarioId);
                 currentDraggedScenarioIndex = scenarioIndex;
                 console.log(`currentDraggedScenarioIndex: ${currentDraggedScenarioIndex}`);
             }
@@ -233,7 +232,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             
             const xScale = scaleBand()
             .range([0, solutionDimensionsState.width])
-            .domain(scenarioIdState)
+            .domain(scenarioIdsState)
             .padding(0.01);
             const xAxis = axisBottom(xScale);
             
