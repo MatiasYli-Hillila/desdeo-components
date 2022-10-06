@@ -133,6 +133,8 @@ function getReadFileTestExampleData() {
           currentScenarioId = data[i][key]?.toString(); 
           //console.log(currentScenarioId);
           //console.log(readFileScenarioIds.find(value => (value === currentScenarioId)));
+          // TODO: see if this can be done without eslint-disable
+          // eslint-disable-next-line no-loop-func
           if (readFileScenarioIds.find(value => (value === currentSolutionId)) === undefined) readFileScenarioIds.push(currentScenarioId);
           //console.log(readFileScenarioIds);
           continue; 
@@ -143,6 +145,8 @@ function getReadFileTestExampleData() {
           // @ts-ignore
           currentSolutionId = data[i][key]?.toString(); 
           //console.log(currentSolutionId);
+          // TODO: see if this can be done without eslint-disable
+          // eslint-disable-next-line no-loop-func
           if (readFileSolutionIds.find(value => (value === currentSolutionId)) === undefined) readFileSolutionIds.push(currentSolutionId);
           //console.log(readFileSolutionIds);
           continue; 
