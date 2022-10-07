@@ -53,6 +53,11 @@ type ScenarioBasedSolution = {
 
 type ScenarioBasedSolutionCollection = {
   solutions: ScenarioBasedSolution[];
+  /*
+    TODO: Should maximize, ideals, and nadirs be in one Map? e.g. Map<string, [boolean, number, number]>?
+    If so, then what would the name be? Need to also communicate effectively which number is ideal and which nadir.
+    objectivesToMaximizeAndIdealsAndNadirs seems like a cumbersome name.
+  */
   objectivesToMaximize: Map<string, boolean>;
   objectiveIdeals: Map<string, number>;
   objectiveNadirs: Map<string, number>;
