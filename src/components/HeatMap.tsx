@@ -127,14 +127,18 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             else if (solutionCollection.objectivesToMaximize.get(datum.objectiveId))
             {
                 percentOfIdealString += `(maximizing): ${
-                    (datum.objectiveValue / solutionCollection.objectiveIdeals.get(datum.objectiveId)!).toFixed(2)
+                    ((datum.objectiveValue - solutionCollection.objectiveNadirs.get(datum.objectiveId)!) /
+                    (solutionCollection.objectiveIdeals.get(datum.objectiveId)! - solutionCollection.objectiveNadirs.get(datum.objectiveId)!))
+                    .toFixed(2)
                 }`;
             }
 
             else
             {
-                percentOfIdealString += `(minimizing): ${(
-                    solutionCollection.objectiveIdeals.get(datum.objectiveId)! / datum.objectiveValue).toFixed(2)
+                percentOfIdealString += `(minimizing): ${
+                    ((solutionCollection.objectiveNadirs.get(datum.objectiveId)! - datum.objectiveValue) /
+                    (solutionCollection.objectiveNadirs.get(datum.objectiveId)! - solutionCollection.objectiveIdeals.get(datum.objectiveId)!))
+                    .toFixed(2)
                 }`;
             }
             tooltip
