@@ -1,3 +1,5 @@
+// TODO: this file has a lot of unused stuff.
+
 import HorizontalBars from "./components/HorizontalBars";
 import ParallelAxes from "./components/ParallelAxes";
 import RadarChart from "./components/RadarChart";
