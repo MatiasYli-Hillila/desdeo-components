@@ -152,6 +152,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         const legendSVG = svgContainer.append('svg').classed('svg-content', true)
         .attr('width', 100 + 20)
         .attr('height', 400);
+        //.style('outline', 'thick solid #FFFFFF');
+        
         
         const legendGradient = legendSVG.append('defs')
         .append('linearGradient')
@@ -178,11 +180,14 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         //.attr('width', renderW)
         //.attr('height', renderH)
         .append('rect')
-        .attr('width', 100)
-        .attr('height', 400)
+        .attr('width', 98)
+        .attr('height', 398)
+        .attr('x', 1)
+        .attr('y', 1)
         //.attr('x', solutionDimensionsState.width + solutionDimensionsState.margin.right)
         //.attr('y', solutionDimensionsState.height/2 - 64/2)
         .style('fill', 'url(#legendGradient)')
+        .style('outline', 'thin solid #000000');
         
         
         legendSVG.append('text')
@@ -220,13 +225,14 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             }
         };
         
-        // TODO: Use different class? Make this work better (i.e. margins)
+        // TODO: Use different class? Make this work better (i.e. margins); ADD OUTLINE.
         const removedSolutionsList = svgContainer.append('g').classed('svg-content', true)
         //.attr('transform', `translate(${solutionDimensionsState.margin.left}, 0`)
         //.attr("transform", `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
         //.attr('x', 50)
         .attr('width', 100)
         .attr('height', 400)
+        //.style('outline', 'thick solid #FFFFFF')
         .append('text')
         .attr('x', 50)
         .attr('y', 20)
