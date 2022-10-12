@@ -1,81 +1,100 @@
+import { axisBottom, axisLeft } from "d3-axis";
+import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { useEffect, useState, useRef } from "react";
 
 import "./Svg.css";
 
-interface SB_EAFProps {
-    
-}
+interface solutionDimensions {
+    width: number,
+    height: number,
+    margin: {
+        top: number,
+        right: number,
+        bottom: number,
+        left: number
+    }
+};
 
-const SB_EAF = () => {
+interface SB_EAFProps {
+    solutionDimensions?: solutionDimensions;
+};
+
+const SB_EAF = ({solutionDimensions}: SB_EAFProps) => {
     const ref = useRef(null);
-    
+    const solutionDefaultDimensions: solutionDimensions = {
+        width: 300,
+        height: 300,
+        margin: {
+            top: 80,
+            right: 20,
+            bottom: 80,
+            left: 80
+        }
+    };
+
+    const [
+        solutionDimensionsState,
+        setSolutionDimensionsState
+    ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
+
     useEffect(() => {
+
+        const renderW = solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
+        const renderH = solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
+
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
-    
+
         const svg = svgContainer
         .append('svg')
         .classed('svg-content', true)
-        .attr('width', 400)
-        .attr('height', 400);
-        
-        //#region overlap test 1
-        svg//.selectAll()
-        //.append('g')
-        .append('rect')
-        .attr('width', 200)
-        .attr('height', 50)
-        .attr('x', 0)
-        .attr('y', 0)
-        .style('fill', 'black')
-        .style('opacity', 0.5);
-        
-        svg
-        .append('rect')
-        .attr('width', 100)
-        .attr('height', 50)
-        .attr('x', 100)
-        .attr('y', 0)
-        .style('fill', 'red')
-        .style('opacity', 0.5);
-        
-        svg
-        .append('rect')
-        .attr('width', 100)
-        .attr('height', 50)
-        .attr('x', 200)
-        .attr('y', 0)
-        .style('fill', 'black')
-        .style('opacity', 0.5);
-        
-        svg
-        .append('rect')
-        .attr('width', 100)
-        .attr('height', 50)
-        .attr('x', 300)
-        .attr('y', 0)
-        .style('fill', 'red')
-        .style('opacity', 0.5);
-        
-        svg
-        .append("circle")
-        .attr("cx", 150 )
-        .attr("cy", 25 )
-        .attr("r", 2)
-        .style("fill", "yellow")
+        .attr('width', renderW)
+        .attr('height', renderH);
+
+        const xScale = scaleLinear()
+        .range([0, solutionDimensionsState.width])
+        .domain([0, 100]);
+        const xAxis = axisBottom(xScale);
+
+        const yScale = scaleLinear()
+        .range([solutionDimensionsState.height, 0])
+        .domain([0, 100]);
+        const yAxis = axisLeft(yScale);
 
         svg
-        .append('text')
-        .attr('x', 150)
-        .attr('y', 15)
-        .style('text-anchor', 'middle')
-        .style('font-size', '12px')
-        .text(() => 'Scenario 1')
-        .style('fill', 'black')
-        
-        //#endregion
+        .append('g')
+        .attr(
+            "transform",
+            `translate(
+                ${solutionDimensionsState.margin.left},
+                ${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
+        .call(xAxis);
 
+        svg
+        .append('g')
+        .attr(
+            'transform',
+            `translate(
+                ${solutionDimensionsState.margin.left},
+                ${solutionDimensionsState.margin.top})`)
+        .call(yAxis);
+
+        svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", renderW/2)
+        .attr("y", solutionDimensionsState.height + solutionDimensionsState.margin.top + 40)
+        .text("Placeholder text f1 (min)");
+
+        svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 40)
+        .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
+        .text("Placeholder text f2 (min)");
+
+        /*
+        //#region placeholder visualization
         svg
         .append('rect')
         .attr('width', 300)
@@ -150,8 +169,11 @@ const SB_EAF = () => {
         .style('font-size', '12px')
         .text(() => 'Scenario 3')
         .style('fill', 'black');
+
+        //#endregion
+        */
     });
-    
+
     return <div ref={ref} id="container" className="component-container"/>
 };
 
