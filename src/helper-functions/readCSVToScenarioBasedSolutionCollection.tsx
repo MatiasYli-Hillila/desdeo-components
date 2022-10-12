@@ -78,7 +78,5 @@ export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: st
         calculateAndSetNadirAndIdealForSolutionCollection(readFileSolutionCollection);
     });
 
-    console.log('new SolutionCollection read from file.');
-    console.log(readFileSolutionCollection);
     return readFileSolutionCollection;
 };
