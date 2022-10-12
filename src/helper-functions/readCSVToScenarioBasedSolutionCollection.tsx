@@ -1,8 +1,12 @@
+// TODO: add support for files to define nadir and ideal vectors
+// TODO: add support for files to define which objectives to minimize or maximize
+
 import { csv } from "d3-fetch";
 import {
     ScenarioBasedObjectiveValue,
     ScenarioBasedSolutionCollection
 } from '../types/ProblemTypes';
+import calculateAndSetNadirAndIdealForSolutionCollection from "./calculateNadirAndIdealForSolutionCollection";
 
 /**
  * Reads a CSV file into a ScenarioBasedSolutionCollection. CSV file is assumed to have the following structure:
@@ -18,6 +22,7 @@ import {
 export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: string)
 {
     const testData = csv(CSVFileName);
+    // TODO: should this be renamed?
     let readFileSolutionCollection: ScenarioBasedSolutionCollection = {
         solutions: [],
         objectivesToMaximize: new Map<string, boolean>(),
@@ -63,13 +68,17 @@ export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: st
         for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
         {
             readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], false);
+            /*
             // TODO: Calculate the actual ideals and nadirs here
             readFileSolutionCollection.objectiveIdeals.set(readFileSolutionCollection.objectiveIds[i], 0);
             readFileSolutionCollection.objectiveNadirs.set(readFileSolutionCollection.objectiveIds[i], 10);
+            */
         };
+
+        calculateAndSetNadirAndIdealForSolutionCollection(readFileSolutionCollection);
     });
 
     console.log('new SolutionCollection read from file.');
     console.log(readFileSolutionCollection);
     return readFileSolutionCollection;
-}
+};
