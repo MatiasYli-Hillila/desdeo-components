@@ -4,11 +4,15 @@ import { select } from "d3-selection";
 import { scaleBand } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { interpolateBlues } from "d3-scale-chromatic";
-import { pointer } from "d3-selection";
 import { drag } from "d3-drag";
 import "d3-transition";
 
-import { ScenarioBasedObjectiveValue, ScenarioBasedSolution, ScenarioBasedSolutionCollection } from "../types/ProblemTypes"
+import {
+    ScenarioBasedObjectiveValue,
+    ScenarioBasedSolution,
+    ScenarioBasedSolutionCollection
+} from "../types/ProblemTypes";
+
 import "./Svg.css";
 
 interface solutionDimensions {
