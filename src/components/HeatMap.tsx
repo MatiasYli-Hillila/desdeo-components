@@ -150,7 +150,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             }
 
             tooltip
-            .html(`Value: ${datum.objectiveValue.toString()}</br> ${percentOfIdealString}`);
+            .html(`Value: ${datum.objectiveValue.toString()}</br></br> ${percentOfIdealString}`);
 
             tooltip
             .style('left', `${x+20}px`)
