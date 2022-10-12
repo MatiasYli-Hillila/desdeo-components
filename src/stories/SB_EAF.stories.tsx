@@ -7,7 +7,7 @@ import {  } from "../data/ExampleData";
 
 
 export default {
-  title: "SB-EAF",
+  title: "Scenario based/SB-EAF",
   component: SB_EAF,
 };
 

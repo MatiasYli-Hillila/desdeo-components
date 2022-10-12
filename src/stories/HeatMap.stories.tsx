@@ -9,7 +9,7 @@ import {
 
 
 export default {
-    title: "HeatMap",
+    title: "Scenario based/HeatMap",
     component: HeatMap,
 };
 
