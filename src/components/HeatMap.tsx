@@ -121,9 +121,13 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
 
         const tooltipMousemove = (event : MouseEvent, datum : ScenarioBasedObjectiveValue) => {
-            const [x,y] = pointer(event);
+            const [x,y] = [event.pageX, event.pageY];
             var percentOfIdealString = 'goodness% ';
-            if (solutionCollection.objectiveIdeals === undefined) return;
+
+            if (solutionCollection.objectiveIdeals === undefined)
+            {
+                return;
+            }
             else if (solutionCollection.objectivesToMaximize.get(datum.objectiveId))
             {
                 percentOfIdealString += `(maximizing): ${
@@ -132,7 +136,6 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     .toFixed(2)
                 }`;
             }
-
             else
             {
                 percentOfIdealString += `(minimizing): ${
@@ -141,8 +144,11 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     .toFixed(2)
                 }`;
             }
+
             tooltip
-            .html(`Value: ${datum.objectiveValue.toString()}</br> ${percentOfIdealString}`)
+            .html(`Value: ${datum.objectiveValue.toString()}</br> ${percentOfIdealString}`);
+
+            tooltip
             .style('left', `${x+20}px`)
             .style('top', `${y-10}px`);
         };
