@@ -45,7 +45,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     };
 
     // TODO: This goes over column 120, but reindenting breaks if it's not oneliner
-    const [solutionDimensionsState, setSolutionDimensionsState] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
+    const [
+        solutionDimensionsState,
+        setSolutionDimensionsState
+    ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
     const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
@@ -97,11 +100,13 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     var mouseoveredObjectiveIndex = useRef<number>(null!);
     var currentDraggedObjectiveIndex = useRef<number>(null!);
 
+    const renderW =
+        solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
+    const renderH =
+        solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
+
     /* Render the component */
     useEffect(() => {
-
-        const renderW = solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
-        const renderH = solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
 
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
@@ -279,6 +284,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
 
             if (svg === undefined) console.log('svg undefined');
 
+            //#region mouse functions
+
             // TODO: Refactor mouseover functions to be more general, they have copypasted code
             const solutionMouseover = (event: MouseEvent) => {
                 const target = event.target as HTMLElement;
@@ -361,7 +368,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 }
             }
 
-
+            //#endregion
 
             const xScale = scaleBand()
             .range([0, solutionDimensionsState.width])
@@ -372,7 +379,11 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             // TODO: Refactor ts-ignore away
             // @ts-ignore
             svg.append("g")
-            .attr("transform", `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
+            .attr(
+                "transform",
+                `translate(
+                    ${solutionDimensionsState.margin.left},
+                    ${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
             .call(xAxis)
             .selectAll('text')
             .attr('class', d => d)
@@ -389,8 +400,13 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
 
             // TODO: Refactor ts-ignore away
             // @ts-ignore
-            svg.append("g")
-            .attr('transform', `translate(${solutionDimensionsState.margin.left},${solutionDimensionsState.margin.top})`)
+            svg
+            .append("g")
+            .attr(
+                'transform',
+                `translate(
+                    ${solutionDimensionsState.margin.left},
+                    ${solutionDimensionsState.margin.top})`)
             .call(yAxis)
             .selectAll('text')
             .attr('class', d => d)
@@ -406,7 +422,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .style("font-size", "16px")
             .text(() => solutionsState[i].solutionId.toString())
             .style('fill', 'black')
-            .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent))
+            .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
 
             // TODO: Refactor ts-ignore away
             // @ts-ignore
@@ -425,20 +441,9 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
             .style('fill', datum => {
-                if (solutionCollection.objectivesToMaximize.get(datum.objectiveId)) return interpolateBlues(
-                    // TODO: Calculate solutions.objectiveIdeals from the biggest/smallest value if not provided
-                    // TODO: Use Math.abs instead?
-                    // TODO: Refactor ts-ignore away.
-                    // @ts-ignore
-                    (datum.objectiveValue - solutionCollection.objectiveNadirs.get(datum.objectiveId)) /
-                    // @ts-ignore
-                    (solutionCollection.objectiveIdeals.get(datum.objectiveId) - solutionCollection.objectiveNadirs.get(datum.objectiveId))
-                ); else return interpolateBlues(
-                        // @ts-ignore
-                        (datum.objectiveValue - solutionCollection.objectiveNadirs.get(datum.objectiveId)) /
-                        // @ts-ignore
-                        (solutionCollection.objectiveIdeals.get(datum.objectiveId) - solutionCollection.objectiveNadirs.get(datum.objectiveId))
-                );
+                const nadir = solutionCollection.objectiveNadirs.get(datum.objectiveId)!;
+                const ideal = solutionCollection.objectiveIdeals.get(datum.objectiveId)!;
+                return interpolateBlues((datum.objectiveValue - nadir) / (ideal - nadir));
             })
             .on('mousemove', tooltipMousemove)
             .on('mouseleave', tooltipMouseleave)
