@@ -24,7 +24,7 @@ export default function calculateAndSetNadirAndIdealForSolutionCollection(soluti
             const currentNadir = newNadirs.get(objectiveId)!;
             const currentIdeal = newIdeals.get(objectiveId)!;
             const maximize: boolean = solutionCollection.objectivesToMaximize.get(objectiveValue.objectiveId)!;
-            // TODO: what should the indentation here be?
+            // TODO: What should the indentation here be?
             if ((maximize && nextValue < currentNadir) || (!maximize && nextValue > currentNadir)
             ) newNadirs.set(objectiveId, nextValue);
             else if ((maximize && nextValue > currentIdeal) || (!maximize && nextValue < currentIdeal)

@@ -1,5 +1,5 @@
-// TODO: add support for files to define nadir and ideal vectors
-// TODO: add support for files to define which objectives to minimize or maximize
+// TODO: Add support for files to define nadir and ideal vectors
+// TODO: Add support for files to define which objectives to minimize or maximize
 
 import { csv } from "d3-fetch";
 import {
@@ -9,7 +9,9 @@ import {
 import calculateAndSetNadirAndIdealForSolutionCollection from "./calculateNadirAndIdealForSolutionCollection";
 
 /**
- * Reads a CSV file into a ScenarioBasedSolutionCollection. CSV file is assumed to have the following structure:
+ * Reads a CSV file into a ScenarioBasedSolutionCollection. All objectives are currently assumed to be minimized.
+ *
+ * CSV file is assumed to have the following structure:
  *
  * Line 1: solution, scenario, objective id 1, objective id 2, ...
  *
@@ -22,7 +24,7 @@ import calculateAndSetNadirAndIdealForSolutionCollection from "./calculateNadirA
 export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: string)
 {
     const testData = csv(CSVFileName);
-    // TODO: should this be renamed?
+    // TODO: Should this be renamed?
     let readFileSolutionCollection: ScenarioBasedSolutionCollection = {
         solutions: [],
         objectivesToMaximize: new Map<string, boolean>(),
@@ -65,14 +67,11 @@ export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: st
             };
         };
 
+        // TODO: if component can accept information about whether objectives are being minimized or maximized,
+        // this part needs to be updated
         for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
         {
             readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], false);
-            /*
-            // TODO: Calculate the actual ideals and nadirs here
-            readFileSolutionCollection.objectiveIdeals.set(readFileSolutionCollection.objectiveIds[i], 0);
-            readFileSolutionCollection.objectiveNadirs.set(readFileSolutionCollection.objectiveIds[i], 10);
-            */
         };
 
         calculateAndSetNadirAndIdealForSolutionCollection(readFileSolutionCollection);

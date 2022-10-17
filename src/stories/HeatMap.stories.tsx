@@ -13,7 +13,7 @@ export default {
     component: HeatMap,
 };
 
-const Template: Story<ComponentProps<typeof HeatMap>> = (args) => {
+const Template: Story<ComponentProps<typeof HeatMap>> = args => {
     return <HeatMap {...args}/>
 };
 
