@@ -42,13 +42,20 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
 
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
 
-    console.log(solutionsState[0].objectiveValues[0]);
-    console.log(solutionsState[0].objectiveValues[1]);
+    const renderW =
+    solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
+    const renderH =
+    solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
+
+    //console.log(solutionsState[0].objectiveValues[0]);
+    //console.log(solutionsState[0].objectiveValues[1]);
+
+    const legendCellsX0 = 30;
+    const legendCellsY0 = 60;
+    const legendCellsWidth = 20;
+    const legendCellsHeight = 20;
 
     useEffect(() => {
-
-        const renderW = solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
-        const renderH = solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
 
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
@@ -59,70 +66,51 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .attr('width', 200)
         .attr('height', renderH);
 
-        const asdf = 60;
-        const qwerty = 30;
+        for (let i = 0; i < solutionsState.length; i++)
+        {
+            legendSVG
+            .append('rect')
+            .attr('width', legendCellsWidth)
+            .attr('height', legendCellsHeight*(solutionsState.length-i))
+            .attr('x', legendCellsX0)
+            .attr('y', legendCellsY0 + i*legendCellsHeight)
+            .style('fill', 'red')
+            .style('opacity', 0.35);
+
+            legendSVG
+            .append('text')
+            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
+            .attr('y', legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
+            .style('text-anchor', 'left')
+            .style('font-size', '12px')
+            .text(i+1)
+            .style('fill', 'black');
+        };
 
         legendSVG
-        .append('text')
-        .attr('x', 20)
-        .attr('y', 25)
-        .text('Number of scenarios');
+            .append('text')
+            .attr('x', 20)
+            .attr('y', 25)
+            .text('Number of scenarios');
 
         legendSVG
-        .append('rect')
-        .attr('width', 40)
-        .attr('height', 80)
-        .attr('x', qwerty)
-        .attr('y', asdf)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+            .append('text')
+            .attr('x', 20)
+            .attr('y', 200)
+            .text('Solution');
 
-        legendSVG
-        .append('text')
-        .attr('x', 50+qwerty)
-        .attr('y', 25+asdf)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text('1')
-        .style('fill', 'black');
+            legendSVG
+            .append("circle")
+            .attr("cx", 30)
+            .attr("cy", 220)
+            .attr("r", 3)
+            .style("fill", "green");
 
-        legendSVG
-        .append('rect')
-        .attr('width', 40)
-        .attr('height', 40)
-        .attr('x', qwerty)
-        .attr('y', 40+asdf)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
-
-        legendSVG
-        .append('text')
-        .attr('x', 50+qwerty)
-        .attr('y', 25+40+asdf)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text('2')
-        .style('fill', 'black');
-
-        legendSVG
-        .append('text')
-        .attr('x', 20)
-        .attr('y', 200)
-        .text('Solution');
-
-        legendSVG
-        .append("circle")
-        .attr("cx", 30)
-        .attr("cy", 220)
-        .attr("r", 3)
-        .style("fill", "green");
-
-        legendSVG
-        .append('text')
-        .attr('x', 40)
-        .attr('y', 223)
-        .text(solutionCollection.solutions[0].solutionId);
-
+            legendSVG
+            .append('text')
+            .attr('x', 40)
+            .attr('y', 223)
+            .text(solutionCollection.solutions[0].solutionId);
 
         const svg = svgContainer
         .append('svg')
@@ -152,176 +140,176 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             `translate(
                 ${solutionDimensionsState.margin.left},
                 ${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
-        .call(xAxis);
+                .call(xAxis);
 
-        svg
-        .append('g')
-        .attr(
-            'transform',
-            `translate(
-                ${solutionDimensionsState.margin.left},
-                ${solutionDimensionsState.margin.top})`)
-        .call(yAxis);
+                svg
+                .append('g')
+                .attr(
+                    'transform',
+                    `translate(
+                        ${solutionDimensionsState.margin.left},
+                        ${solutionDimensionsState.margin.top})`)
+                        .call(yAxis);
 
-        svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("x", renderW/2)
-        .attr("y", solutionDimensionsState.height + solutionDimensionsState.margin.top + 40)
-        //.text("Placeholder text f1 (min)");
-        .text(
-            `${solutionCollection.objectiveIds[0]} (
-                ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[0]) ? 'max' : 'min'})`)
+                        svg.append("text")
+                        .attr("text-anchor", "middle")
+                        .attr("x", renderW/2)
+                        .attr("y", solutionDimensionsState.height + solutionDimensionsState.margin.top + 40)
+                        //.text("Placeholder text f1 (min)");
+                        .text(
+                            `${solutionCollection.objectiveIds[0]} (
+                                ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[0]) ? 'max' : 'min'})`)
 
-        svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 40)
-        .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
-        //.text("Placeholder text f2 (min)");
-        .text(
-            `${solutionCollection.objectiveIds[1]} (
-                ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`)
+                                svg.append("text")
+                                .attr("text-anchor", "middle")
+                                .attr("transform", "rotate(-90)")
+                                .attr("y", 40)
+                                .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
+                                //.text("Placeholder text f2 (min)");
+                                .text(
+                                    `${solutionCollection.objectiveIds[1]} (
+                                        ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`)
 
-        const solution1X = xScale(solutionsState[0].objectiveValues[0].objectiveValue);
-        const solution1Y = yScale(solutionsState[0].objectiveValues[1].objectiveValue);
-        const solution2X = xScale(solutionsState[0].objectiveValues[2].objectiveValue);
-        const solution2Y = yScale(solutionsState[0].objectiveValues[3].objectiveValue);
+                                        const solution1X = xScale(solutionsState[0].objectiveValues[0].objectiveValue);
+                                        const solution1Y = yScale(solutionsState[0].objectiveValues[1].objectiveValue);
+                                        const solution2X = xScale(solutionsState[0].objectiveValues[2].objectiveValue);
+                                        const solution2Y = yScale(solutionsState[0].objectiveValues[3].objectiveValue);
 
-        console.log(xScale(0.8));
+                                        console.log(xScale(0.8));
 
-        svg
-        .append('rect')
-        .attr('width', solutionDimensionsState.width-solution1X)
-        .attr('height', solution1Y)
-        .attr('x', solution1X+solutionDimensionsState.margin.left)
-        .attr('y', solutionDimensionsState.margin.bottom)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+                                        svg
+                                        .append('rect')
+                                        .attr('width', solutionDimensionsState.width-solution1X)
+                                        .attr('height', solution1Y)
+                                        .attr('x', solution1X+solutionDimensionsState.margin.left)
+                                        .attr('y', solutionDimensionsState.margin.bottom)
+                                        .style('fill', 'red')
+                                        .style('opacity', 0.35);
 
-        svg
-        .append("circle")
-        .attr("cx", solution1X+solutionDimensionsState.margin.left)
-        .attr("cy", solutionDimensionsState.margin.bottom+solution1Y)
-        .attr("r", 3)
-        .style("fill", "green")
+                                        svg
+                                        .append("circle")
+                                        .attr("cx", solution1X+solutionDimensionsState.margin.left)
+                                        .attr("cy", solutionDimensionsState.margin.bottom+solution1Y)
+                                        .attr("r", 3)
+                                        .style("fill", "green")
 
-        svg
-        .append('text')
-        .attr('x', solution1X+solutionDimensionsState.margin.left+4)
-        .attr('y', solutionDimensionsState.margin.bottom+solution1Y-4)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text('s1')
-        .style('fill', 'black')
+                                        svg
+                                        .append('text')
+                                        .attr('x', solution1X+solutionDimensionsState.margin.left+4)
+                                        .attr('y', solutionDimensionsState.margin.bottom+solution1Y-4)
+                                        .style('text-anchor', 'left')
+                                        .style('font-size', '12px')
+                                        .text('s1')
+                                        .style('fill', 'black')
 
-        svg
-        .append('rect')
-        .attr('width', solutionDimensionsState.width-solution2X)
-        .attr('height', solution2Y)
-        .attr('x', solution2X+solutionDimensionsState.margin.left)
-        .attr('y', solutionDimensionsState.margin.bottom)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+                                        svg
+                                        .append('rect')
+                                        .attr('width', solutionDimensionsState.width-solution2X)
+                                        .attr('height', solution2Y)
+                                        .attr('x', solution2X+solutionDimensionsState.margin.left)
+                                        .attr('y', solutionDimensionsState.margin.bottom)
+                                        .style('fill', 'red')
+                                        .style('opacity', 0.35);
 
-        svg
-        .append("circle")
-        .attr("cx", solution2X+solutionDimensionsState.margin.left)
-        .attr("cy", solutionDimensionsState.margin.bottom+solution2Y)
-        .attr("r", 3)
-        .style("fill", "green")
+                                        svg
+                                        .append("circle")
+                                        .attr("cx", solution2X+solutionDimensionsState.margin.left)
+                                        .attr("cy", solutionDimensionsState.margin.bottom+solution2Y)
+                                        .attr("r", 3)
+                                        .style("fill", "green")
 
-        svg
-        .append('text')
-        .attr('x', solution2X+solutionDimensionsState.margin.left+4)
-        .attr('y', solutionDimensionsState.margin.bottom+solution2Y-4)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text('s2')
-        .style('fill', 'black')
+                                        svg
+                                        .append('text')
+                                        .attr('x', solution2X+solutionDimensionsState.margin.left+4)
+                                        .attr('y', solutionDimensionsState.margin.bottom+solution2Y-4)
+                                        .style('text-anchor', 'left')
+                                        .style('font-size', '12px')
+                                        .text('s2')
+                                        .style('fill', 'black')
 
 
-        /*
-        //#region placeholder visualization
-        svg
-        .append('rect')
-        .attr('width', 300)
-        .attr('height', 200)
-        .attr('x', 0)
-        .attr('y', 200)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+                                        /*
+                                        //#region placeholder visualization
+                                        svg
+                                        .append('rect')
+                                        .attr('width', 300)
+                                        .attr('height', 200)
+                                        .attr('x', 0)
+                                        .attr('y', 200)
+                                        .style('fill', 'red')
+                                        .style('opacity', 0.35);
 
-        svg
-        .append("circle")
-        .attr("cx", 2 )
-        .attr("cy", 398 )
-        .attr("r", 3)
-        .style("fill", "green")
+                                        svg
+                                        .append("circle")
+                                        .attr("cx", 2 )
+                                        .attr("cy", 398 )
+                                        .attr("r", 3)
+                                        .style("fill", "green")
 
-        svg
-        .append('text')
-        .attr('x', 4)
-        .attr('y', 390)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text(() => 'Scenario 1')
-        .style('fill', 'black')
+                                        svg
+                                        .append('text')
+                                        .attr('x', 4)
+                                        .attr('y', 390)
+                                        .style('text-anchor', 'left')
+                                        .style('font-size', '12px')
+                                        .text(() => 'Scenario 1')
+                                        .style('fill', 'black')
 
-        svg
-        .append('rect')
-        .attr('width', 200)
-        .attr('height', 150)
-        .attr('x', 100)
-        .attr('y', 200)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+                                        svg
+                                        .append('rect')
+                                        .attr('width', 200)
+                                        .attr('height', 150)
+                                        .attr('x', 100)
+                                        .attr('y', 200)
+                                        .style('fill', 'red')
+                                        .style('opacity', 0.35);
 
-        svg
-        .append("circle")
-        .attr("cx", 102 )
-        .attr("cy", 350 )
-        .attr("r", 3)
-        .style("fill", "green");
+                                        svg
+                                        .append("circle")
+                                        .attr("cx", 102 )
+                                        .attr("cy", 350 )
+                                        .attr("r", 3)
+                                        .style("fill", "green");
 
-        svg
-        .append('text')
-        .attr('x', 104)
-        .attr('y', 342)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text(() => 'Scenario 2')
-        .style('fill', 'black');
+                                        svg
+                                        .append('text')
+                                        .attr('x', 104)
+                                        .attr('y', 342)
+                                        .style('text-anchor', 'left')
+                                        .style('font-size', '12px')
+                                        .text(() => 'Scenario 2')
+                                        .style('fill', 'black');
 
-        svg
-        .append('rect')
-        .attr('width', 220)
-        .attr('height', 120)
-        .attr('x', 80)
-        .attr('y', 200)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+                                        svg
+                                        .append('rect')
+                                        .attr('width', 220)
+                                        .attr('height', 120)
+                                        .attr('x', 80)
+                                        .attr('y', 200)
+                                        .style('fill', 'red')
+                                        .style('opacity', 0.35);
 
-        svg
-        .append("circle")
-        .attr("cx", 82 )
-        .attr("cy", 320 )
-        .attr("r", 3)
-        .style("fill", "green");
+                                        svg
+                                        .append("circle")
+                                        .attr("cx", 82 )
+                                        .attr("cy", 320 )
+                                        .attr("r", 3)
+                                        .style("fill", "green");
 
-        svg
-        .append('text')
-        .attr('x', 84)
-        .attr('y', 312)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text(() => 'Scenario 3')
-        .style('fill', 'black');
+                                        svg
+                                        .append('text')
+                                        .attr('x', 84)
+                                        .attr('y', 312)
+                                        .style('text-anchor', 'left')
+                                        .style('font-size', '12px')
+                                        .text(() => 'Scenario 3')
+                                        .style('fill', 'black');
 
-        //#endregion
-        */
-    });
+                                        //#endregion
+                                        */
+                                    });
 
-    return <div ref={ref} id="container" className="component-container"/>
-};
+                                    return <div ref={ref} id="container" className="component-container"/>
+                                };
 
-export default SB_EAF;
+                                export default SB_EAF;
