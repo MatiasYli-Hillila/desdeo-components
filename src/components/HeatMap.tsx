@@ -416,7 +416,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .call(objectiveDrag);
 
             svg.append('text')
-            .attr("x", (solutionDimensionsState.width / 2))
+            .attr("x", (solutionDimensionsState.width / 2 + solutionDimensionsState.margin.left))
             .attr("y", (solutionDimensionsState.margin.top / 2))
             .style("text-anchor", "middle")
             .style("font-size", "16px")
