@@ -54,6 +54,7 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
     const legendCellsY0 = 60;
     const legendCellsWidth = 20;
     const legendCellsHeight = 20;
+    const cellOpacity = 1 / solutionCollection.scenarioIds.length;
 
     useEffect(() => {
 
@@ -66,39 +67,13 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .attr('width', 200)
         .attr('height', renderH);
 
-        for (let i = 0; i < solutionsState.length; i++)
-        {
-            legendSVG
-            .append('rect')
-            .attr('width', legendCellsWidth)
-            .attr('height', legendCellsHeight*(solutionsState.length-i))
-            .attr('x', legendCellsX0)
-            .attr('y', legendCellsY0 + i*legendCellsHeight)
-            .style('fill', 'red')
-            .style('opacity', 0.35);
-
-            legendSVG
-            .append('text')
-            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
-            .attr('y', legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
-            .style('text-anchor', 'left')
-            .style('font-size', '12px')
-            .text(i+1)
-            .style('fill', 'black');
-
-            legendSVG
-            .append('text')
-            .attr('x', 40)
-            .attr('y', 223 + 16*i)
-            .text(solutionCollection.solutions[i].solutionId);
-        };
-
         legendSVG
         .append('text')
         .attr('x', 20)
         .attr('y', 25)
         .text('Number of scenarios');
 
+        /*
         legendSVG
         .append('text')
         .attr('x', 20)
@@ -111,119 +86,162 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .attr("cy", 220)
         .attr("r", 3)
         .style("fill", "green");
+        */
 
-        const svg = svgContainer
-        .append('svg')
-        .classed('svg-content', true)
-        .attr('width', renderW)
-        .attr('height', renderH);
+        for (let i = 0; i < solutionCollection.scenarioIds.length; i++)
+        {
+            legendSVG
+            .append('rect')
+            .attr('width', legendCellsWidth)
+            .attr('height', legendCellsHeight*(solutionCollection.scenarioIds.length-i))
+            .attr('x', legendCellsX0)
+            .attr('y', legendCellsY0 + i*legendCellsHeight)
+            .style('fill', 'red')
+            .style('opacity', cellOpacity);
 
-        // the next().value property of these iterators returns key-value pairs from the respective maps
-        // value[0] is the key, value[1] is the corresponding value
-        const nadirsIterator = solutionCollection.objectiveNadirs.entries();
-        const idealsIterator = solutionCollection.objectiveIdeals.entries();
+            legendSVG
+            .append('text')
+            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
+            .attr('y', legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
+            .style('text-anchor', 'left')
+            .style('font-size', '12px')
+            .text(i+1)
+            .style('fill', 'black');
+        }
 
-        const xScale = scaleLinear()
-        .range([0, solutionDimensionsState.width])
-        .domain([nadirsIterator.next().value[1], idealsIterator.next().value[1]]);
-        const xAxis = axisBottom(xScale);
+        for (let i = 0; i < solutionsState.length; i++)
+        {
 
-        svg
-        .append('g')
-        .attr(
-            "transform",
-            `translate(
-                ${solutionDimensionsState.margin.left},
-                ${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
-        .call(xAxis);
 
-        const yScale = scaleLinear()
-        .range([solutionDimensionsState.height, 0])
-        .domain([nadirsIterator.next().value[1], idealsIterator.next().value[1]]);
-        const yAxis = axisLeft(yScale);
+            /*
+            legendSVG
+            .append('text')
+            .attr('x', 40)
+            .attr('y', 223 + 16*i)
+            .text(solutionCollection.solutions[i].solutionId);
+            */
 
-        svg
-        .append('g')
-        .attr(
-            'transform',
-            `translate(
-                ${solutionDimensionsState.margin.left},
-                ${solutionDimensionsState.margin.top})`)
-        .call(yAxis);
+            const svg = svgContainer
+            .append('svg')
+            .classed('svg-content', true)
+            .attr('width', renderW)
+            .attr('height', renderH);
 
-        svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("x", renderW/2)
-        .attr("y", solutionDimensionsState.height + solutionDimensionsState.margin.top + 40)
-        // TODO: Line over 120
-        .text(
-            `${solutionCollection.objectiveIds[0]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[0]) ? 'max' : 'min'})`
-        );
+            svg.append('text')
+            .attr("x", (solutionDimensionsState.width / 2 + solutionDimensionsState.margin.left))
+            .attr("y", (solutionDimensionsState.margin.top / 2))
+            .style("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text(() => solutionsState[i].solutionId.toString())
+            .style('fill', 'black');
 
-        svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 40)
-        .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
-        .text(
-            `${solutionCollection.objectiveIds[1]} (
-                ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
-        );
+            // the next().value property of these iterators returns key-value pairs from the respective maps
+            // value[0] is the key, value[1] is the corresponding value
+            const nadirsIterator = solutionCollection.objectiveNadirs.entries();
+            const idealsIterator = solutionCollection.objectiveIdeals.entries();
 
-        const solution1X = xScale(solutionsState[0].objectiveValues[0].objectiveValue);
-        const solution1Y = yScale(solutionsState[0].objectiveValues[1].objectiveValue);
-        const solution2X = xScale(solutionsState[0].objectiveValues[2].objectiveValue);
-        const solution2Y = yScale(solutionsState[0].objectiveValues[3].objectiveValue);
+            const xScale = scaleLinear()
+            .range([0, solutionDimensionsState.width])
+            .domain([nadirsIterator.next().value[1], idealsIterator.next().value[1]]);
+            const xAxis = axisBottom(xScale);
 
-        svg
-        .append('rect')
-        .attr('width', solutionDimensionsState.width-solution1X)
-        .attr('height', solution1Y)
-        .attr('x', solution1X+solutionDimensionsState.margin.left)
-        .attr('y', solutionDimensionsState.margin.bottom)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+            svg
+            .append('g')
+            .attr(
+                "transform",
+                `translate(
+                    ${solutionDimensionsState.margin.left},
+                    ${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
+            .call(xAxis);
 
-        svg
-        .append("circle")
-        .attr("cx", solution1X+solutionDimensionsState.margin.left)
-        .attr("cy", solutionDimensionsState.margin.bottom+solution1Y)
-        .attr("r", 3)
-        .style("fill", "green")
+            const yScale = scaleLinear()
+            .range([solutionDimensionsState.height, 0])
+            .domain([nadirsIterator.next().value[1], idealsIterator.next().value[1]]);
+            const yAxis = axisLeft(yScale);
 
-        svg
-        .append('text')
-        .attr('x', solution1X+solutionDimensionsState.margin.left+4)
-        .attr('y', solutionDimensionsState.margin.bottom+solution1Y-4)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text('s1')
-        .style('fill', 'black')
+            svg
+            .append('g')
+            .attr(
+                'transform',
+                `translate(
+                    ${solutionDimensionsState.margin.left},
+                    ${solutionDimensionsState.margin.top})`)
+            .call(yAxis);
 
-        svg
-        .append('rect')
-        .attr('width', solutionDimensionsState.width-solution2X)
-        .attr('height', solution2Y)
-        .attr('x', solution2X+solutionDimensionsState.margin.left)
-        .attr('y', solutionDimensionsState.margin.bottom)
-        .style('fill', 'red')
-        .style('opacity', 0.35);
+            svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("x", renderW/2)
+            .attr("y", solutionDimensionsState.height + solutionDimensionsState.margin.top + 40)
+            // TODO: Line over 120
+            .text(
+                `${solutionCollection.objectiveIds[0]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[0]) ? 'max' : 'min'})`
+            );
 
-        svg
-        .append("circle")
-        .attr("cx", solution2X+solutionDimensionsState.margin.left)
-        .attr("cy", solutionDimensionsState.margin.bottom+solution2Y)
-        .attr("r", 3)
-        .style("fill", "green")
+            svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 40)
+            .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
+            .text(
+                `${solutionCollection.objectiveIds[1]} (
+                    ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
+            );
 
-        svg
-        .append('text')
-        .attr('x', solution2X+solutionDimensionsState.margin.left+4)
-        .attr('y', solutionDimensionsState.margin.bottom+solution2Y-4)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text('s2')
-        .style('fill', 'black')
+            const solution1X = xScale(solutionsState[i].objectiveValues[0].objectiveValue);
+            const solution1Y = yScale(solutionsState[i].objectiveValues[1].objectiveValue);
+            const solution2X = xScale(solutionsState[i].objectiveValues[2].objectiveValue);
+            const solution2Y = yScale(solutionsState[i].objectiveValues[3].objectiveValue);
+
+            svg
+            .append('rect')
+            .attr('width', solutionDimensionsState.width-solution1X)
+            .attr('height', solution1Y)
+            .attr('x', solution1X+solutionDimensionsState.margin.left)
+            .attr('y', solutionDimensionsState.margin.bottom)
+            .style('fill', 'red')
+            .style('opacity', 0.5);
+
+            svg
+            .append("circle")
+            .attr("cx", solution1X+solutionDimensionsState.margin.left)
+            .attr("cy", solutionDimensionsState.margin.bottom+solution1Y)
+            .attr("r", 3)
+            .style("fill", "green")
+
+            svg
+            .append('text')
+            .attr('x', solution1X+solutionDimensionsState.margin.left+4)
+            .attr('y', solutionDimensionsState.margin.bottom+solution1Y-4)
+            .style('text-anchor', 'left')
+            .style('font-size', '12px')
+            .text('s1')
+            .style('fill', 'black')
+
+            svg
+            .append('rect')
+            .attr('width', solutionDimensionsState.width-solution2X)
+            .attr('height', solution2Y)
+            .attr('x', solution2X+solutionDimensionsState.margin.left)
+            .attr('y', solutionDimensionsState.margin.bottom)
+            .style('fill', 'red')
+            .style('opacity', cellOpacity);
+
+            svg
+            .append("circle")
+            .attr("cx", solution2X+solutionDimensionsState.margin.left)
+            .attr("cy", solutionDimensionsState.margin.bottom+solution2Y)
+            .attr("r", 3)
+            .style("fill", "green")
+
+            svg
+            .append('text')
+            .attr('x', solution2X+solutionDimensionsState.margin.left+4)
+            .attr('y', solutionDimensionsState.margin.bottom+solution2Y-4)
+            .style('text-anchor', 'left')
+            .style('font-size', '12px')
+            .text('s2')
+            .style('fill', 'black')
+            };
     });
 
     return <div ref={ref} id="container" className="component-container"/>
