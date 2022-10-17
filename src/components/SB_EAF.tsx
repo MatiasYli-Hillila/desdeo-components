@@ -61,6 +61,8 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         const svgContainer = select(ref.current);
         svgContainer.selectAll('*').remove();
 
+        //#region legend
+
         const legendSVG = svgContainer
         .append('svg')
         .classed('svg-content', true)
@@ -109,10 +111,10 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .style('fill', 'black');
         }
 
+        //#endregion
+
         for (let i = 0; i < solutionsState.length; i++)
         {
-
-
             /*
             legendSVG
             .append('text')
@@ -182,9 +184,8 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .attr("transform", "rotate(-90)")
             .attr("y", 40)
             .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
-            .text(
-                `${solutionCollection.objectiveIds[1]} (
-                    ${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
+            // TODO: Line over 120
+            .text(`${solutionCollection.objectiveIds[1]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
             );
 
             const solution1X = xScale(solutionsState[i].objectiveValues[0].objectiveValue);
