@@ -62,14 +62,8 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
             {
                 newObjectiveVector.objectiveValues[j] = Number(data[i][objectiveId]);
                 j++;
-                //console.log('readCSVtoVectorsArray: data[i][objectiveId]')
-                //console.log(data[i][objectiveId]);
-                //console.log(Number(data[i][j+2]));
             };
-            //console.log('readCSVtoVectorsArray: newObjectiveVector');
-            //console.log(newObjectiveVector);
             readFileSolutionCollection.solutions.at(-1)!.objectiveVectors.push(newObjectiveVector);
-            //console.log(readFileSolutionCollection.solutions);
         };
 
         // TODO: If component can accept information about whether objectives are being minimized or maximized,

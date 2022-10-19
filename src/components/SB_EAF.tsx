@@ -195,14 +195,19 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             const scenario2Y = yScale(solutionsState[i].objectiveValues[3].objectiveValue);
             */
 
-            /*
+
             svg.selectAll()
             .append('g')
-            .data(solutionsState[i].objectiveValues)
+            .data(solutionsState[i].objectiveVectors)
             .enter()
             .append('circle')
-            .attr('cx', datum => xScale(datum.scenarioId) + solutionDimensionsState.margin.left)
-            */
+            .attr('cx', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left)
+            .attr('cy', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top)
+            .attr('r', 3)
+            .style('fill', (_,i) => {
+                console.log((Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16));
+                return `#${(Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16)}`;
+            });
 /*
             svg
             .append('rect')

@@ -18,7 +18,6 @@ export default function calculateAndSetNadirAndIdealForSolutionCollectionUsingOb
 
         for (const solution of solutionCollection.solutions)
         {
-            console.log(solution);
             for (const objectiveVector of solution.objectiveVectors)
             {
                 let i = 0;
@@ -39,6 +38,4 @@ export default function calculateAndSetNadirAndIdealForSolutionCollectionUsingOb
         }
         solutionCollection.objectiveNadirs = newNadirs;
         solutionCollection.objectiveIdeals = newIdeals;
-        console.log('calculateAndSetN&IVector');
-        console.log(newNadirs);
     };
