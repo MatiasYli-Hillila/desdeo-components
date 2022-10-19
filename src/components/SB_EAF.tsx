@@ -139,12 +139,17 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
 
             // the next().value property of these iterators returns key-value pairs from the respective maps
             // value[0] is the key, value[1] is the corresponding value
+            const maxIterator = solutionCollection.objectivesToMaximize.entries();
             const nadirsIterator = solutionCollection.objectiveNadirs.entries();
             const idealsIterator = solutionCollection.objectiveIdeals.entries();
 
             const xScale = scaleLinear()
             .range([0, solutionDimensionsState.width])
-            .domain([nadirsIterator.next().value[1], idealsIterator.next().value[1]]);
+            .domain(
+                maxIterator.next().value[1]
+                ? [nadirsIterator.next().value[1], idealsIterator.next().value[1]]
+                : [idealsIterator.next().value[1], nadirsIterator.next().value[1]]
+            );
             const xAxis = axisBottom(xScale);
 
             svg
@@ -158,7 +163,11 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
 
             const yScale = scaleLinear()
             .range([solutionDimensionsState.height, 0])
-            .domain([nadirsIterator.next().value[1], idealsIterator.next().value[1]]);
+            .domain(
+                maxIterator.next().value[1]
+                ? [nadirsIterator.next().value[1], idealsIterator.next().value[1]]
+                : [idealsIterator.next().value[1], nadirsIterator.next().value[1]]
+            );
             const yAxis = axisLeft(yScale);
 
             svg
