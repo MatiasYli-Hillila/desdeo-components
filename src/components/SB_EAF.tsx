@@ -1,6 +1,7 @@
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
+import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
 import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
 
@@ -205,6 +206,20 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             */
 
 
+
+
+            svg.selectAll()
+            .append('g')
+            .data(solutionsState[i].objectiveVectors)
+            .enter()
+            .append('rect')
+            .attr('width', datum => solutionDimensionsState.width - xScale(datum.objectiveValues[0]))
+            .attr('height', datum => yScale(datum.objectiveValues[1]))
+            .attr('x', datum => solutionDimensionsState.margin.left + xScale(datum.objectiveValues[0]))
+            .attr('y', datum => solutionDimensionsState.margin.top)
+            .style('fill', 'red')
+            .style('opacity', cellOpacity);
+
             svg.selectAll()
             .append('g')
             .data(solutionsState[i].objectiveVectors)
@@ -214,19 +229,17 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .attr('cy', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top)
             .attr('r', 3)
             .style('fill', (_,i) => {
-                console.log((Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16));
                 return `#${(Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16)}`;
             });
-/*
-            svg
-            .append('rect')
-            .attr('width', solutionDimensionsState.width-scenario1X)
-            .attr('height', scenario1Y)
-            .attr('x', scenario1X+solutionDimensionsState.margin.left)
-            .attr('y', solutionDimensionsState.margin.bottom)
-            .style('fill', 'red')
-            .style('opacity', 0.5);
 
+            svg.selectAll()
+            .data(solutionsState[i].objectiveVectors)
+            .enter()
+            .append('text')
+            .text(datum => datum.scenarioId)
+            .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
+            .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4);
+/*
             svg
             .append("circle")
             .attr("cx", scenario1X+solutionDimensionsState.margin.left)
