@@ -2,7 +2,7 @@ import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { useEffect, useState, useRef } from "react";
-import { ScenarioBasedSolutionCollection } from "../types/ProblemTypes";
+import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
 
 import "./Svg.css";
 
@@ -18,7 +18,7 @@ interface solutionDimensions {
 };
 
 interface SB_EAFProps {
-    solutionCollection: ScenarioBasedSolutionCollection;
+    solutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray;
     solutionDimensions?: solutionDimensions;
 };
 
@@ -188,31 +188,42 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .text(`${solutionCollection.objectiveIds[1]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
             );
 
-            const solution1X = xScale(solutionsState[i].objectiveValues[0].objectiveValue);
-            const solution1Y = yScale(solutionsState[i].objectiveValues[1].objectiveValue);
-            const solution2X = xScale(solutionsState[i].objectiveValues[2].objectiveValue);
-            const solution2Y = yScale(solutionsState[i].objectiveValues[3].objectiveValue);
+            /*
+            const scenario1X = xScale(solutionsState[i].objectiveValues[0].objectiveValue);
+            const scenario1Y = yScale(solutionsState[i].objectiveValues[1].objectiveValue);
+            const scenario2X = xScale(solutionsState[i].objectiveValues[2].objectiveValue);
+            const scenario2Y = yScale(solutionsState[i].objectiveValues[3].objectiveValue);
+            */
 
+            /*
+            svg.selectAll()
+            .append('g')
+            .data(solutionsState[i].objectiveValues)
+            .enter()
+            .append('circle')
+            .attr('cx', datum => xScale(datum.scenarioId) + solutionDimensionsState.margin.left)
+            */
+/*
             svg
             .append('rect')
-            .attr('width', solutionDimensionsState.width-solution1X)
-            .attr('height', solution1Y)
-            .attr('x', solution1X+solutionDimensionsState.margin.left)
+            .attr('width', solutionDimensionsState.width-scenario1X)
+            .attr('height', scenario1Y)
+            .attr('x', scenario1X+solutionDimensionsState.margin.left)
             .attr('y', solutionDimensionsState.margin.bottom)
             .style('fill', 'red')
             .style('opacity', 0.5);
 
             svg
             .append("circle")
-            .attr("cx", solution1X+solutionDimensionsState.margin.left)
-            .attr("cy", solutionDimensionsState.margin.bottom+solution1Y)
+            .attr("cx", scenario1X+solutionDimensionsState.margin.left)
+            .attr("cy", solutionDimensionsState.margin.bottom+scenario1Y)
             .attr("r", 3)
             .style("fill", "green")
 
             svg
             .append('text')
-            .attr('x', solution1X+solutionDimensionsState.margin.left+4)
-            .attr('y', solutionDimensionsState.margin.bottom+solution1Y-4)
+            .attr('x', scenario1X+solutionDimensionsState.margin.left+4)
+            .attr('y', solutionDimensionsState.margin.bottom+scenario1Y-4)
             .style('text-anchor', 'left')
             .style('font-size', '12px')
             .text('s1')
@@ -220,28 +231,29 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
 
             svg
             .append('rect')
-            .attr('width', solutionDimensionsState.width-solution2X)
-            .attr('height', solution2Y)
-            .attr('x', solution2X+solutionDimensionsState.margin.left)
+            .attr('width', solutionDimensionsState.width-scenario2X)
+            .attr('height', scenario2Y)
+            .attr('x', scenario2X+solutionDimensionsState.margin.left)
             .attr('y', solutionDimensionsState.margin.bottom)
             .style('fill', 'red')
             .style('opacity', cellOpacity);
 
             svg
             .append("circle")
-            .attr("cx", solution2X+solutionDimensionsState.margin.left)
-            .attr("cy", solutionDimensionsState.margin.bottom+solution2Y)
+            .attr("cx", scenario2X+solutionDimensionsState.margin.left)
+            .attr("cy", solutionDimensionsState.margin.bottom+scenario2Y)
             .attr("r", 3)
             .style("fill", "green")
 
             svg
             .append('text')
-            .attr('x', solution2X+solutionDimensionsState.margin.left+4)
-            .attr('y', solutionDimensionsState.margin.bottom+solution2Y-4)
+            .attr('x', scenario2X+solutionDimensionsState.margin.left+4)
+            .attr('y', solutionDimensionsState.margin.bottom+scenario2Y-4)
             .style('text-anchor', 'left')
             .style('font-size', '12px')
             .text('s2')
             .style('fill', 'black')
+            */
             };
     });
 

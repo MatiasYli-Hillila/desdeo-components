@@ -1,15 +1,16 @@
 // TODO: Add support for files to define nadir and ideal vectors
-// TODO: Add support for files to define which objectives to minimize or maximize
+// TODO: Add support for files to define which objectives to minimize or maximize?
 
 import { csv } from "d3-fetch";
 import {
     ScenarioBasedObjectiveValue,
-    ScenarioBasedSolutionCollection
+    ScenarioBasedSolutionCollectionUsingObjectiveValuesArray
 } from '../types/ProblemTypes';
-import calculateAndSetNadirAndIdealForSolutionCollection from "./calculateNadirAndIdealForSolutionCollection";
+import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArray
+    from "./calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArray";
 
 /**
- * Reads a CSV file into a ScenarioBasedSolutionCollection. All objectives are currently assumed to be minimized.
+ * Reads a CSV file into a ScenarioBasedSolutionCollectionUsingObjectiveValuesArray. All objectives are currently assumed to be minimized.
  *
  * CSV file is assumed to have the following structure:
  *
@@ -19,13 +20,13 @@ import calculateAndSetNadirAndIdealForSolutionCollection from "./calculateNadirA
  *
  * Reads CSV using the csv function from d3-fetch.
  *
- * @return ScenarioBasedSolutionCollection based on contents of read CSV file
+ * @return ScenarioBasedSolutionCollectionUsingObjectiveValuesArray based on contents of read CSV file
  */
-export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: string)
+export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray(CSVFileName: string)
 {
-    const testData = csv(CSVFileName);
+    const csvData = csv(CSVFileName);
     // TODO: Should this be renamed?
-    let readFileSolutionCollection: ScenarioBasedSolutionCollection = {
+    let readFileSolutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveValuesArray = {
         solutions: [],
         objectivesToMaximize: new Map<string, boolean>(),
         objectiveIdeals: new Map<string, number>(),
@@ -34,7 +35,7 @@ export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: st
         objectiveIds: []
     };
 
-    testData.then(data => {
+    csvData.then(data => {
         readFileSolutionCollection.objectiveIds = data.columns.slice(2);
         let readFileSolutionIds: string[] = [];
 
@@ -67,14 +68,14 @@ export default function readCSVToScenarioBasedSolutionCollection(CSVFileName: st
             };
         };
 
-        // TODO: if component can accept information about whether objectives are being minimized or maximized,
+        // TODO: If component can accept information about whether objectives are being minimized or maximized,
         // this part needs to be updated
         for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
         {
             readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], false);
         };
 
-        calculateAndSetNadirAndIdealForSolutionCollection(readFileSolutionCollection);
+        calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArray(readFileSolutionCollection);
     });
 
     return readFileSolutionCollection;

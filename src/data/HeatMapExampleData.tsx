@@ -1,7 +1,8 @@
-import { ScenarioBasedSolutionCollection } from '../types/ProblemTypes';
-import readCSVToScenarioBasedSolutionCollection from '../helper-functions/readCSVToScenarioBasedSolutionCollection';
+import { ScenarioBasedSolutionCollectionUsingObjectiveValuesArray } from '../types/ProblemTypes';
+import readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray
+    from '../helper-functions/readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray';
 
-export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionCollection = {
+export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionCollectionUsingObjectiveValuesArray = {
     solutions: [
         {
             solutionId: 'Solution 1',
@@ -35,7 +36,7 @@ export const exampleData2Objectives2Scenarios2Solutions : ScenarioBasedSolutionC
     objectiveIds: ['o1', 'o2']
 };
 
-export const exampleData3Objectives3Scenarios3Solutions : ScenarioBasedSolutionCollection = {
+export const exampleData3Objectives3Scenarios3Solutions : ScenarioBasedSolutionCollectionUsingObjectiveValuesArray = {
     solutions: [
         {
             solutionId: 'Sol A',
@@ -96,4 +97,5 @@ export const exampleData3Objectives3Scenarios3Solutions : ScenarioBasedSolutionC
     objectiveIds: ['objective 1', 'objective 2', 'objective 3']
 };
 
-export const readFileTestExampleData = readCSVToScenarioBasedSolutionCollection('./data/eg4.5data-long.csv');
+export const readFileTestExampleData =
+    readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray('./data/eg4.5data-long.csv');

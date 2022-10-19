@@ -1,8 +1,9 @@
 import {
-    ScenarioBasedSolutionCollection
+    ScenarioBasedSolutionCollectionUsingObjectiveValuesArray
 } from "../types/ProblemTypes";
 
-export default function calculateAndSetNadirAndIdealForSolutionCollection(solutionCollection: ScenarioBasedSolutionCollection)
+export default function calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArray(
+    solutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveValuesArray)
 {
     var newNadirs = new Map<string, number>();
     var newIdeals = new Map<string, number>();

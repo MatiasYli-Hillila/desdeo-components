@@ -9,8 +9,8 @@ import "d3-transition";
 
 import {
     ScenarioBasedObjectiveValue,
-    ScenarioBasedSolution,
-    ScenarioBasedSolutionCollection
+    ScenarioBasedSolutionUsingObjectiveValues,
+    ScenarioBasedSolutionCollectionUsingObjectiveValuesArray
 } from "../types/ProblemTypes";
 
 import "./Svg.css";
@@ -27,7 +27,7 @@ interface solutionDimensions {
 };
 
 interface HeatMapProps {
-    solutionCollection : ScenarioBasedSolutionCollection;
+    solutionCollection : ScenarioBasedSolutionCollectionUsingObjectiveValuesArray;
     solutionDimensions?: solutionDimensions;
 };
 
@@ -50,7 +50,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         setSolutionDimensionsState
     ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
-    const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolution>());
+    const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolutionUsingObjectiveValues>());
     const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
     const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
 
