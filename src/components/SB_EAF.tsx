@@ -113,7 +113,6 @@ const SB_EAF = (
         .attr('x', legendCellsX0)
         .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
         .style('fill', (_,i) => scenarioCountColorsState[i])
-        //.style('opacity', cellOpacity)
 
         if (showScenarioNamesState)
         {
@@ -223,29 +222,7 @@ const SB_EAF = (
             .text(`${solutionCollection.objectiveIds[1]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
             );
 
-            /*
-            const scenario1X = xScale(solutionsState[i].objectiveValues[0].objectiveValue);
-            const scenario1Y = yScale(solutionsState[i].objectiveValues[1].objectiveValue);
-            const scenario2X = xScale(solutionsState[i].objectiveValues[2].objectiveValue);
-            const scenario2Y = yScale(solutionsState[i].objectiveValues[3].objectiveValue);
-            */
-
-
             const rectInfo = calculateCollisionsForSolution(solutionsState[i]);
-            /*
-            for (let j = 0; j < rectInfo.length; j++)
-            {
-                //console.log(`rectInfo loop: ${j.toString()}, x: ${solutionDimensionsState.margin.left + rectInfo[j][0]}`)
-                svg.selectAll()
-                .append('g')
-                .append('rect')
-                .attr('x', solutionDimensionsState.margin.left + rectInfo[j][0])
-                .attr('y', solutionDefaultDimensions.margin.top + rectInfo[j][1])
-                .attr('width', solutionDimensionsState.width - xScale(rectInfo[j][0]))
-                .attr('height', yScale(rectInfo[j][1]))
-                .style('fill', 'red');
-            }
-            */
 
             svg.selectAll()
             .append('g')
@@ -257,20 +234,6 @@ const SB_EAF = (
             .attr('width', d => solutionDimensionsState.width - xScale(d[0]))
             .attr('height', d => yScale(d[1]))
             .style('fill', d => scenarioCountColorsState[d[2]]);
-
-            /*
-            svg.selectAll()
-            .append('g')
-            .data(solutionsState[i].objectiveVectors)
-            .enter()
-            .append('rect')
-            .attr('width', datum => solutionDimensionsState.width - xScale(datum.objectiveValues[0]))
-            .attr('height', datum => yScale(datum.objectiveValues[1]))
-            .attr('x', datum => solutionDimensionsState.margin.left + xScale(datum.objectiveValues[0]))
-            .attr('y', datum => solutionDimensionsState.margin.top)
-            .style('fill', 'red')
-            .style('opacity', cellOpacity);
-            */
 
             svg.selectAll()
             .append('g')
@@ -291,48 +254,6 @@ const SB_EAF = (
             .text(datum => datum.scenarioId)
             .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
             .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4);
-/*
-            svg
-            .append("circle")
-            .attr("cx", scenario1X+solutionDimensionsState.margin.left)
-            .attr("cy", solutionDimensionsState.margin.bottom+scenario1Y)
-            .attr("r", 3)
-            .style("fill", "green")
-
-            svg
-            .append('text')
-            .attr('x', scenario1X+solutionDimensionsState.margin.left+4)
-            .attr('y', solutionDimensionsState.margin.bottom+scenario1Y-4)
-            .style('text-anchor', 'left')
-            .style('font-size', '12px')
-            .text('s1')
-            .style('fill', 'black')
-
-            svg
-            .append('rect')
-            .attr('width', solutionDimensionsState.width-scenario2X)
-            .attr('height', scenario2Y)
-            .attr('x', scenario2X+solutionDimensionsState.margin.left)
-            .attr('y', solutionDimensionsState.margin.bottom)
-            .style('fill', 'red')
-            .style('opacity', cellOpacity);
-
-            svg
-            .append("circle")
-            .attr("cx", scenario2X+solutionDimensionsState.margin.left)
-            .attr("cy", solutionDimensionsState.margin.bottom+scenario2Y)
-            .attr("r", 3)
-            .style("fill", "green")
-
-            svg
-            .append('text')
-            .attr('x', scenario2X+solutionDimensionsState.margin.left+4)
-            .attr('y', solutionDimensionsState.margin.bottom+scenario2Y-4)
-            .style('text-anchor', 'left')
-            .style('font-size', '12px')
-            .text('s2')
-            .style('fill', 'black')
-            */
             };
     });
 
