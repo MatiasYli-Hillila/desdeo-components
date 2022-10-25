@@ -378,7 +378,8 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
 
             // TODO: Refactor ts-ignore away
             // @ts-ignore
-            svg.append("g")
+            svg
+            .append("g")
             .attr(
                 "transform",
                 `translate(
@@ -424,20 +425,14 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .style('fill', 'black')
             .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
 
-            // TODO: Refactor ts-ignore away
-            // @ts-ignore
             svg.selectAll()
             .append('g')
             .data(solutionsState[i].objectiveValues)
             .enter()
             .append('rect')
             .attr('class', solutionsState[i].solutionId)
-            // TODO: Refactor ts-ignore away
-            // @ts-ignore
-            .attr('x', datum => xScale(datum.scenarioId) + solutionDimensionsState.margin.left)
-            // TODO: Refactor ts-ignore away
-            // @ts-ignore
-            .attr('y', datum => yScale(datum.objectiveId) + solutionDimensionsState.margin.top)
+            .attr('x', datum => xScale(datum.scenarioId)! + solutionDimensionsState.margin.left)
+            .attr('y', datum => yScale(datum.objectiveId)! + solutionDimensionsState.margin.top)
             .attr('width', xScale.bandwidth())
             .attr('height', yScale.bandwidth())
             .style('fill', datum => {
