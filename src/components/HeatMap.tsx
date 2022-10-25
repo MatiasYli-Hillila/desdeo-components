@@ -47,7 +47,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     // TODO: Line over 120
     const [
         solutionDimensionsState,
-        setSolutionDimensionsState
+        //setSolutionDimensionsState
     ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
     const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolutionUsingObjectiveValues>());
