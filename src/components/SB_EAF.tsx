@@ -1,7 +1,7 @@
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
-import { defaultMaxListeners } from "events";
+//import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
 import { calculateCollisionsForSolution } from "../helper-functions/rectFunctions";
 import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
@@ -22,10 +22,23 @@ interface solutionDimensions {
 interface SB_EAFProps {
     solutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray;
     solutionDimensions?: solutionDimensions;
+    showScenarioNames?: boolean;
+    scenarioCountColors?: string[];
 };
 
-const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
+const SB_EAF = (
+    {
+        solutionCollection,
+        solutionDimensions,
+        showScenarioNames,
+        scenarioCountColors
+    }: SB_EAFProps) => {
+
     const ref = useRef(null);
+
+    // TODO: Document default values somehow
+    //#region Constants and states
+
     const solutionDefaultDimensions: solutionDimensions = {
         width: 300,
         height: 300,
@@ -36,27 +49,40 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             left: 80
         }
     };
-
-    const [
-        solutionDimensionsState,
-        setSolutionDimensionsState
-    ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
-
-    const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
-
-    const renderW =
-    solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
-    const renderH =
-    solutionDimensionsState.height + solutionDimensionsState.margin.bottom + solutionDimensionsState.margin.top;
-
-    //console.log(solutionsState[0].objectiveValues[0]);
-    //console.log(solutionsState[0].objectiveValues[1]);
-
+    const defaultScenarioCountColors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
     const legendCellsX0 = 30;
     const legendCellsY0 = 60;
     const legendCellsWidth = 20;
     const legendCellsHeight = 20;
-    const cellOpacity = 1 / solutionCollection.scenarioIds.length;
+    const axisMinMultiplier = 0.9;
+    const axisMaxMultiplier = 1.1;
+
+    const [
+        solutionDimensionsState,
+        //setSolutionDimensionsState
+    ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
+
+    const [
+        solutionsState,
+        //setSolutionsState
+    ] = useState(solutionCollection.solutions);
+    const [
+        showScenarioNamesState,
+        //setShowScenarioNamesState
+    ] = useState((showScenarioNames !== undefined) ? showScenarioNames : true);
+    const [
+        scenarioCountColorsState,
+        //setScenarioCountColorsState
+    ] = useState(scenarioCountColors ? scenarioCountColors : defaultScenarioCountColors);
+
+    const renderW = solutionDimensionsState.width +
+        solutionDimensionsState.margin.left +
+        solutionDimensionsState.margin.right;
+    const renderH = solutionDimensionsState.height +
+        solutionDimensionsState.margin.bottom +
+        solutionDimensionsState.margin.top;
+
+    //#endregion
 
     useEffect(() => {
 
@@ -83,13 +109,13 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .enter()
         .append('rect')
         .attr('width', legendCellsWidth)
-        .attr('height', (_,i) => legendCellsHeight*(solutionCollection.scenarioIds.length-i))
+        .attr('height', legendCellsHeight)
         .attr('x', legendCellsX0)
         .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
-        .style('fill', 'red')
-        .style('opacity', cellOpacity)
+        .style('fill', (_,i) => scenarioCountColorsState[i])
+        //.style('opacity', cellOpacity)
 
-        if (true) // TODO: Prop (state?) that controls showing of scenario names
+        if (showScenarioNamesState)
         {
             legendSVG
             .selectAll()
@@ -103,8 +129,6 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .text((_,i) => i+1)
             .style('fill', 'black');
         }
-
-
 
         /*
         legendSVG
@@ -125,14 +149,6 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
 
         for (let i = 0; i < solutionsState.length; i++)
         {
-            /*
-            legendSVG
-            .append('text')
-            .attr('x', 40)
-            .attr('y', 223 + 16*i)
-            .text(solutionCollection.solutions[i].solutionId);
-            */
-
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
@@ -157,10 +173,10 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .range([0, solutionDimensionsState.width])
             .domain(
                 maxIterator.next().value[1]
-                ? [nadirsIterator.next().value[1], idealsIterator.next().value[1]]
-                : [idealsIterator.next().value[1], nadirsIterator.next().value[1]]
+                ? [nadirsIterator.next().value[1]*axisMinMultiplier, idealsIterator.next().value[1]*axisMaxMultiplier]
+                : [idealsIterator.next().value[1]*axisMinMultiplier, nadirsIterator.next().value[1]*axisMaxMultiplier]
             );
-            const xAxis = axisBottom(xScale);
+            const xAxis = axisBottom(xScale).ticks(6);
 
             svg
             .append('g')
@@ -175,10 +191,10 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .range([solutionDimensionsState.height, 0])
             .domain(
                 maxIterator.next().value[1]
-                ? [nadirsIterator.next().value[1], idealsIterator.next().value[1]]
-                : [idealsIterator.next().value[1], nadirsIterator.next().value[1]]
+                ? [nadirsIterator.next().value[1]*axisMinMultiplier, idealsIterator.next().value[1]*axisMaxMultiplier]
+                : [idealsIterator.next().value[1]*axisMinMultiplier, nadirsIterator.next().value[1]*axisMaxMultiplier]
             );
-            const yAxis = axisLeft(yScale);
+            const yAxis = axisLeft(yScale).ticks(6);
 
             svg
             .append('g')
@@ -231,18 +247,16 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             }
             */
 
-           const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
-
-           svg.selectAll()
-           .append('g')
-           .data(rectInfo)
-           .enter()
-           .append('rect')
-           .attr('x', d => solutionDimensionsState.margin.left + xScale(d[0]))
-                .attr('y', d => solutionDefaultDimensions.margin.top)
-                .attr('width', d => solutionDimensionsState.width - xScale(d[0]))
-                .attr('height', d => yScale(d[1]))
-                .style('fill', d => colors[d[2]]);
+            svg.selectAll()
+            .append('g')
+            .data(rectInfo)
+            .enter()
+            .append('rect')
+            .attr('x', d => solutionDimensionsState.margin.left + xScale(d[0]))
+            .attr('y', solutionDefaultDimensions.margin.top)
+            .attr('width', d => solutionDimensionsState.width - xScale(d[0]))
+            .attr('height', d => yScale(d[1]))
+            .style('fill', d => scenarioCountColorsState[d[2]]);
 
             /*
             svg.selectAll()

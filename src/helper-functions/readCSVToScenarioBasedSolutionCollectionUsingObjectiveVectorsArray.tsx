@@ -8,7 +8,7 @@ import {
 } from '../types/ProblemTypes';
 import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray
     from "./calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray";
-import { calculateCollisionsForSolution } from "./rectFunctions";
+//import { calculateCollisionsForSolution } from "./rectFunctions";
 
 /**
  * Reads a CSV file into a *ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray*.
