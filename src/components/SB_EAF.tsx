@@ -77,6 +77,31 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .attr('y', 25)
         .text('Number of scenarios');
 
+        legendSVG
+        .selectAll()
+        .data(solutionCollection.scenarioIds)
+        .enter()
+        .append('rect')
+        .attr('width', legendCellsWidth)
+        .attr('height', (_,i) => legendCellsHeight*(solutionCollection.scenarioIds.length-i))
+        .attr('x', legendCellsX0)
+        .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
+        .style('fill', 'red')
+        .style('opacity', cellOpacity)
+
+        legendSVG
+        .selectAll()
+        .data(solutionCollection.scenarioIds)
+        .enter()
+        .append('text')
+        .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
+        .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
+        .style('text-anchor', 'left')
+        .style('font-size', '12px')
+        .text((_,i) => i+1)
+        .style('fill', 'black');;
+
+
         /*
         legendSVG
         .append('text')
@@ -91,27 +116,6 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .attr("r", 3)
         .style("fill", "green");
         */
-
-        for (let i = 0; i < solutionCollection.scenarioIds.length; i++)
-        {
-            legendSVG
-            .append('rect')
-            .attr('width', legendCellsWidth)
-            .attr('height', legendCellsHeight*(solutionCollection.scenarioIds.length-i))
-            .attr('x', legendCellsX0)
-            .attr('y', legendCellsY0 + i*legendCellsHeight)
-            .style('fill', 'red')
-            .style('opacity', cellOpacity);
-
-            legendSVG
-            .append('text')
-            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
-            .attr('y', legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
-            .style('text-anchor', 'left')
-            .style('font-size', '12px')
-            .text(i+1)
-            .style('fill', 'black');
-        }
 
         //#endregion
 

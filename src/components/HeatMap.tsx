@@ -44,7 +44,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         }
     };
 
-    // TODO: This goes over column 120, but reindenting breaks if it's not oneliner
+    // TODO: Line over 120
     const [
         solutionDimensionsState,
         setSolutionDimensionsState

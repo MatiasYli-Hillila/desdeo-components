@@ -1,4 +1,5 @@
 // TODO: Implement using linked list
+// TODO: Rename file to something more descriptive (e.g. SB_EAFareaCalculator?)
 
 import { ScenarioBasedSolutionUsingObjectiveVectors } from "../types/ProblemTypes";
 
@@ -17,7 +18,7 @@ export function rectCollision(x1: number, y1: number, x2: number, y2: number): [
     }
 };
 
-// TODO: rename, this calculates rects, not collisions
+// TODO: Rename this function; it calculates rects, not collisions
 export function calculateCollisionsForSolution(solution: ScenarioBasedSolutionUsingObjectiveVectors)
 {
     let orderedRects: Array<[number, number, number]> = [];

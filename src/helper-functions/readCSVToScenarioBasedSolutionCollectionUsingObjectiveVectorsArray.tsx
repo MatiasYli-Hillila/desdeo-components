@@ -11,7 +11,10 @@ import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArr
 import { calculateCollisionsForSolution } from "./rectFunctions";
 
 /**
- * Reads a CSV file into a ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray. All objectives are currently assumed to be minimized.
+ * Reads a CSV file into a *ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray*.
+ * All objectives are currently assumed to be minimized. Uses the csv function from d3-fetch.
+ *
+ * ---
  *
  * CSV file is assumed to have the following structure:
  *
@@ -19,9 +22,9 @@ import { calculateCollisionsForSolution } from "./rectFunctions";
  *
  * Line 2 to infinity: solution id string, scenario id string, numeric value, numeric value...
  *
- * Reads CSV using the csv function from d3-fetch.
+ * ---
  *
- * @return ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray based on contents of read CSV file
+ * @return *ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray* based on contents of read CSV file
  */
 export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray(CSVFileName: string)
 {
@@ -67,8 +70,7 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
             readFileSolutionCollection.solutions.at(-1)!.objectiveVectors.push(newObjectiveVector);
         };
 
-        // TODO: If component can accept information about whether objectives are being minimized or maximized,
-        // this part needs to be updated
+        // TODO: Update this if min/max info is added to objectives
         for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
         {
             readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], false);
