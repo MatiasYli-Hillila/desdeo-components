@@ -89,17 +89,21 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
         .style('fill', 'red')
         .style('opacity', cellOpacity)
 
-        legendSVG
-        .selectAll()
-        .data(solutionCollection.scenarioIds)
-        .enter()
-        .append('text')
-        .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
-        .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
-        .style('text-anchor', 'left')
-        .style('font-size', '12px')
-        .text((_,i) => i+1)
-        .style('fill', 'black');;
+        if (true) // TODO: Prop (state?) that controls showing of scenario names
+        {
+            legendSVG
+            .selectAll()
+            .data(solutionCollection.scenarioIds)
+            .enter()
+            .append('text')
+            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
+            .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
+            .style('text-anchor', 'left')
+            .style('font-size', '12px')
+            .text((_,i) => i+1)
+            .style('fill', 'black');
+        }
+
 
 
         /*
@@ -227,7 +231,7 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             }
             */
 
-            const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+           const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
            svg.selectAll()
            .append('g')
