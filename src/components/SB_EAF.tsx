@@ -3,6 +3,7 @@ import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
+import { calculateCollisionsForSolution } from "../helper-functions/rectFunctions";
 import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
 
 import "./Svg.css";
@@ -206,8 +207,36 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             */
 
 
+            const rectInfo = calculateCollisionsForSolution(solutionsState[i]);
+            /*
+            for (let j = 0; j < rectInfo.length; j++)
+            {
+                //console.log(`rectInfo loop: ${j.toString()}, x: ${solutionDimensionsState.margin.left + rectInfo[j][0]}`)
+                svg.selectAll()
+                .append('g')
+                .append('rect')
+                .attr('x', solutionDimensionsState.margin.left + rectInfo[j][0])
+                .attr('y', solutionDefaultDimensions.margin.top + rectInfo[j][1])
+                .attr('width', solutionDimensionsState.width - xScale(rectInfo[j][0]))
+                .attr('height', yScale(rectInfo[j][1]))
+                .style('fill', 'red');
+            }
+            */
 
+            const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
+           svg.selectAll()
+           .append('g')
+           .data(rectInfo)
+           .enter()
+           .append('rect')
+           .attr('x', d => solutionDimensionsState.margin.left + xScale(d[0]))
+                .attr('y', d => solutionDefaultDimensions.margin.top)
+                .attr('width', d => solutionDimensionsState.width - xScale(d[0]))
+                .attr('height', d => yScale(d[1]))
+                .style('fill', d => colors[d[2]]);
+
+            /*
             svg.selectAll()
             .append('g')
             .data(solutionsState[i].objectiveVectors)
@@ -219,6 +248,7 @@ const SB_EAF = ({solutionCollection, solutionDimensions}: SB_EAFProps) => {
             .attr('y', datum => solutionDimensionsState.margin.top)
             .style('fill', 'red')
             .style('opacity', cellOpacity);
+            */
 
             svg.selectAll()
             .append('g')

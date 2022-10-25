@@ -1,4 +1,4 @@
-// TODO: this file has a lot of unused stuff.
+// TODO: This file has a lot of unused stuff.
 
 import HorizontalBars from "./components/HorizontalBars";
 import ParallelAxes from "./components/ParallelAxes";

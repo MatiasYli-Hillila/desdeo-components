@@ -2,7 +2,8 @@ import React, { ComponentProps } from "react";
 import { Story } from "@storybook/react";
 import SB_EAF from "../components/SB_EAF";
 import {
-    readFileTestExampleData
+    readFileTestExampleData,
+    oneSolTwentyScenariosTwoObjectivesExampleData
  } from "../data/SB_EAFExampleData";
 
 
@@ -19,4 +20,10 @@ const Template: Story<ComponentProps<typeof SB_EAF>> = args => {
 export const readFileDataTest = Template.bind({});
 readFileDataTest.args = {
     solutionCollection: readFileTestExampleData
+};
+
+
+export const OneSolutionTwentyScenariosTwoObjectives = Template.bind({});
+OneSolutionTwentyScenariosTwoObjectives.args = {
+    solutionCollection: oneSolTwentyScenariosTwoObjectivesExampleData
 };

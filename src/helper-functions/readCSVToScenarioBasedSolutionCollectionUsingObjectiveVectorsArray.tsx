@@ -8,6 +8,7 @@ import {
 } from '../types/ProblemTypes';
 import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray
     from "./calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray";
+import { calculateCollisionsForSolution } from "./rectFunctions";
 
 /**
  * Reads a CSV file into a ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray. All objectives are currently assumed to be minimized.
@@ -74,9 +75,22 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
         };
 
         calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray(readFileSolutionCollection);
+
+        /*
+        const asdf = readFileSolutionCollection.solutions[0];
+        if (asdf !== undefined) {
+            console.log('readFileSolutionCollection.solutions:');
+            console.log(readFileSolutionCollection.solutions);
+            console.log(`Entering calculateCollisionsForSolution for asdf:`);
+            console.log(asdf);
+            const qwer = calculateCollisionsForSolution(asdf);
+            console.log('readCSV vectors, rects:');
+            console.log(qwer);
+        }
+        */
     });
 
-    console.log('readFileSolutionCollection:');
-    console.log(readFileSolutionCollection);
+
+
     return readFileSolutionCollection;
 };

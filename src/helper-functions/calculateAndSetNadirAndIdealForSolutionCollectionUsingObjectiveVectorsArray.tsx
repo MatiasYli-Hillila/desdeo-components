@@ -29,7 +29,7 @@ export default function calculateAndSetNadirAndIdealForSolutionCollectionUsingOb
                     const nextValue = objectiveVector.objectiveValues[i];
                     if ((maximize && nextValue < currentNadir) || (!maximize && nextValue > currentNadir)
                     ) newNadirs.set(objectiveId, nextValue);
-                    else if ((maximize && nextValue > currentIdeal) || (!maximize && nextValue < currentIdeal)
+                    if ((maximize && nextValue > currentIdeal) || (!maximize && nextValue < currentIdeal)
                     ) newIdeals.set(objectiveId, nextValue);
                     i++;
                 }
@@ -38,4 +38,6 @@ export default function calculateAndSetNadirAndIdealForSolutionCollectionUsingOb
         }
         solutionCollection.objectiveNadirs = newNadirs;
         solutionCollection.objectiveIdeals = newIdeals;
+        //console.log('calculateNadirIdealForVectors');
+        //console.log(solutionCollection.objectiveIdeals);
     };
