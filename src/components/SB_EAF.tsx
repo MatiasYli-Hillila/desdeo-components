@@ -4,7 +4,7 @@ import { select } from "d3-selection";
 //import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
 import { calculateCollisionsForSolution } from "../helper-functions/rectFunctions";
-import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
+import { ScenarioBasedObjectiveVector, ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
 
 import "./Svg.css";
 
@@ -146,6 +146,37 @@ const SB_EAF = (
 
         //#endregion
 
+        //#region tooltip
+        const tooltip = svgContainer
+        .append('g')
+        .classed('tooltip', true)
+        .style('pointer-events', 'none')
+        .style('visibility', 'hidden')
+        .style('background-color', 'white')
+        .style('border', 'solid')
+        .style('border-width', '2px')
+        .style('border-radius', '5px')
+        .style('padding', '5px')
+        .style('position', 'absolute')
+        .style('z-index', 1000)
+        .text('placeholder');
+
+        const tooltipMouseover = (_: MouseEvent, datum: [number, number, number]) => {
+            // TODO: Think of a better way to express "intersection in the tooltip"
+            tooltip.html(`Number of scenarios: ${datum[2]+1}</br></br> intersection: (${datum[0]},${datum[1]})`);
+
+            tooltip.style('visibility', 'visible');
+        }
+        const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
+
+        const tooltipMousemove = (event: MouseEvent) => {
+            const [x,y] = [event.pageX, event.pageY];
+            tooltip
+            .style('left', `${x+20}px`)
+            .style('top', `${y-10}px`);
+        };
+
+        //#endregion
         for (let i = 0; i < solutionsState.length; i++)
         {
             const svg = svgContainer
@@ -229,11 +260,14 @@ const SB_EAF = (
             .data(rectInfo)
             .enter()
             .append('rect')
-            .attr('x', d => solutionDimensionsState.margin.left + xScale(d[0]))
+            .attr('x', datum => solutionDimensionsState.margin.left + xScale(datum[0]))
             .attr('y', solutionDefaultDimensions.margin.top)
-            .attr('width', d => solutionDimensionsState.width - xScale(d[0]))
-            .attr('height', d => yScale(d[1]))
-            .style('fill', d => scenarioCountColorsState[d[2]]);
+            .attr('width', datum => solutionDimensionsState.width - xScale(datum[0]))
+            .attr('height', datum => yScale(datum[1]))
+            .style('fill', datum => scenarioCountColorsState[datum[2]])
+            .on('mousemove', tooltipMousemove)
+            .on('mouseleave', tooltipMouseleave)
+            .on('mouseover', tooltipMouseover);
 
             svg.selectAll()
             .append('g')
@@ -253,7 +287,9 @@ const SB_EAF = (
             .append('text')
             .text(datum => datum.scenarioId)
             .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
-            .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4);
+            .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
+            .style('pointer-events', 'none');
+
             };
     });
 
