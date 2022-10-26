@@ -32,6 +32,7 @@ Controls.args = {
 
 export const EighteenSolutionsThreeScenariosTwoObjectives = Template.bind({});
 EighteenSolutionsThreeScenariosTwoObjectives.args = {
+    showScenarioNames: true,
     solutionCollection: eighteenSolThreeScenariosTwoObjectivesExampleData
 };
 

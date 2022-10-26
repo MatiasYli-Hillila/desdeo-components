@@ -4,7 +4,7 @@ import { select } from "d3-selection";
 //import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
 import { calculateCollisionsForSolution } from "../helper-functions/rectFunctions";
-import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
+import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray, ScenarioBasedSolutionUsingObjectiveVectors } from "../types/ProblemTypes";
 
 import "./Svg.css";
 
@@ -62,10 +62,11 @@ const SB_EAF = (
         //setSolutionDimensionsState
     ] = useState(solutionDimensions ? solutionDimensions : solutionDefaultDimensions);
 
+    const [solutionsState, setSolutionsState] = useState(solutionCollection.solutions);
     const [
-        solutionsState,
-        //setSolutionsState
-    ] = useState(solutionCollection.solutions);
+        removedSolutionsState,
+        setRemovedSolutionsState
+    ] = useState(Array<ScenarioBasedSolutionUsingObjectiveVectors>());
     const [
         showScenarioNamesState,
         setShowScenarioNamesState
@@ -110,17 +111,19 @@ const SB_EAF = (
         .data(solutionCollection.scenarioIds)
         .enter()
         .append('rect')
+        .attr('id', (_,i) => `legend-rect-${i+1}`)
         .attr('width', legendCellsWidth)
         .attr('height', legendCellsHeight)
         .attr('x', legendCellsX0)
         .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
-        .style('fill', (_,i) => scenarioCountColorsState[i])
+        .style('fill', (_,i) => scenarioCountColorsState[i]);
 
         legendSVG
         .selectAll()
         .data(solutionCollection.scenarioIds)
         .enter()
         .append('text')
+        .attr('id', (_,i) => `legend-text-${i+1}`)
         .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
         .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
         .style('text-anchor', 'left')
@@ -146,6 +149,7 @@ const SB_EAF = (
         //#endregion
 
         //#region tooltip
+
         const tooltip = svgContainer
         .append('g')
         .classed('tooltip', true)
@@ -157,16 +161,50 @@ const SB_EAF = (
         .style('border-radius', '5px')
         .style('padding', '5px')
         .style('position', 'absolute')
-        .style('z-index', 1000)
-        .text('placeholder');
+        .style('z-index', 1000);
+        //.text('placeholder');
 
         const tooltipMouseover = (_: MouseEvent, datum: [number, number, number]) => {
             // TODO: Think of a better way to express "intersection in the tooltip"
             tooltip.html(`Number of scenarios: ${datum[2]+1}</br></br> intersection: (${datum[0]},${datum[1]})`);
 
             tooltip.style('visibility', 'visible');
-        }
-        const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
+
+            legendSVG
+            .select(`#legend-rect-${datum[2]+1}`)
+            .style('stroke-width', 2)
+            .style('stroke', 'rgb(0,0,0');
+
+            const legendSVGFontSize = Number(
+                legendSVG
+                .select(`#legend-text-${datum[2]+1}`)
+                .style('font-size')
+                .slice(0,-2)
+            );
+
+            legendSVG
+                .select(`#legend-text-${datum[2]+1}`)
+                .style('font-size', `${legendSVGFontSize+4}px`);
+        };
+
+        const tooltipMouseleave = (_: MouseEvent, datum: [number, number, number]) => {
+            tooltip.style('visibility', 'hidden');
+
+            legendSVG
+            .selectAll('rect')
+            .style('stroke-width', 0);
+
+            const legendSVGFontSize = Number(
+                legendSVG
+                .select(`#legend-text-${datum[2]+1}`)
+                .style('font-size')
+                .slice(0,-2)
+            );
+
+            legendSVG
+                .select(`#legend-text-${datum[2]+1}`)
+                .style('font-size', `${legendSVGFontSize-4}px`);
+        };
 
         const tooltipMousemove = (event: MouseEvent) => {
             const [x,y] = [event.pageX, event.pageY];
@@ -176,6 +214,54 @@ const SB_EAF = (
         };
 
         //#endregion
+
+        //#region removed solutions list
+
+        const addSolutionBack = (event: MouseEvent) => {
+            const eventTarget = event.target as HTMLElement;
+            console.log('addSolutionBack');
+            const solutionToAddBackIndex = removedSolutionsState.findIndex(i => i.solutionId === eventTarget.textContent);
+            const solutionToAddBack = removedSolutionsState[solutionToAddBackIndex];
+            if (solutionToAddBack !== null && solutionToAddBack !== undefined)
+            {
+                setSolutionsState(state => [...state, solutionToAddBack]);
+                setRemovedSolutionsState([
+                    ...removedSolutionsState.slice(0, solutionToAddBackIndex),
+                    ...removedSolutionsState.slice(solutionToAddBackIndex + 1, removedSolutionsState.length)
+                ]);
+            }
+        };
+
+        const removedSolutionsListSVG = svgContainer
+        .append('svg')
+        .classed('svg-content', true)
+        .attr('width', 200)
+        .attr('height', renderH);
+
+        removedSolutionsListSVG
+        .append('text')
+        .attr('x', 20)
+        .attr('y', 25)
+        //.style('text-anchor', 'middle')
+        //.style('font-size', '16px')
+        .text('Removed solutions')
+        //.style('fill', 'black')
+        .append('ul')
+        //.attr('width', 100)
+        //.attr('height', 400)
+        //.attr('x', 0)
+        .attr('y', 50);
+
+        removedSolutionsListSVG
+        .selectAll('li')
+        .data(removedSolutionsState)
+        .enter()
+        .append('li')
+        .on('click', mouseEvent => addSolutionBack(mouseEvent))
+        .text(d => d.solutionId);
+
+        //#endregion
+
         for (let i = 0; i < solutionsState.length; i++)
         {
             const svg = svgContainer
