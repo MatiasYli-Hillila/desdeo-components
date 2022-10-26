@@ -129,10 +129,14 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         const tooltipMouseover = () => tooltip.style('visibility', 'visible');
         const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
 
+        /**
+         * @param datum
+         */
         const tooltipMousemove = (event : MouseEvent, datum : ScenarioBasedObjectiveValue) => {
             const [x,y] = [event.pageX, event.pageY];
             var percentOfIdealString = 'goodness% ';
 
+            // TODO: Move tooltip text insert to tooltipMouseOver
             if (solutionCollection.objectiveIdeals === undefined)
             {
                 return;
