@@ -4,7 +4,7 @@ import { select } from "d3-selection";
 //import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
 import { calculateCollisionsForSolution } from "../helper-functions/rectFunctions";
-import { ScenarioBasedObjectiveVector, ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
+import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray } from "../types/ProblemTypes";
 
 import "./Svg.css";
 
@@ -22,7 +22,7 @@ interface solutionDimensions {
 interface SB_EAFProps {
     solutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray;
     solutionDimensions?: solutionDimensions;
-    showScenarioNames?: boolean;
+    showScenarioNames: boolean;
     scenarioCountColors?: string[];
 };
 
@@ -68,7 +68,7 @@ const SB_EAF = (
     ] = useState(solutionCollection.solutions);
     const [
         showScenarioNamesState,
-        //setShowScenarioNamesState
+        setShowScenarioNamesState
     ] = useState((showScenarioNames !== undefined) ? showScenarioNames : true);
     const [
         scenarioCountColorsState,
@@ -83,6 +83,8 @@ const SB_EAF = (
         solutionDimensionsState.margin.top;
 
     //#endregion
+
+    useEffect(() => setShowScenarioNamesState(showScenarioNames), [showScenarioNames]);
 
     useEffect(() => {
 
@@ -114,20 +116,17 @@ const SB_EAF = (
         .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
         .style('fill', (_,i) => scenarioCountColorsState[i])
 
-        if (showScenarioNamesState)
-        {
-            legendSVG
-            .selectAll()
-            .data(solutionCollection.scenarioIds)
-            .enter()
-            .append('text')
-            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
-            .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
-            .style('text-anchor', 'left')
-            .style('font-size', '12px')
-            .text((_,i) => i+1)
-            .style('fill', 'black');
-        }
+        legendSVG
+        .selectAll()
+        .data(solutionCollection.scenarioIds)
+        .enter()
+        .append('text')
+        .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
+        .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
+        .style('text-anchor', 'left')
+        .style('font-size', '12px')
+        .text((_,i) => i+1)
+        .style('fill', 'black');
 
         /*
         legendSVG
@@ -281,14 +280,17 @@ const SB_EAF = (
                 return `#${(Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16)}`;
             });
 
-            svg.selectAll()
-            .data(solutionsState[i].objectiveVectors)
-            .enter()
-            .append('text')
-            .text(datum => datum.scenarioId)
-            .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
-            .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
-            .style('pointer-events', 'none');
+            if (showScenarioNamesState)
+            {
+                svg.selectAll()
+                .data(solutionsState[i].objectiveVectors)
+                .enter()
+                .append('text')
+                .text(datum => datum.scenarioId)
+                .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
+                .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
+                .style('pointer-events', 'none');
+            }
 
             };
     });

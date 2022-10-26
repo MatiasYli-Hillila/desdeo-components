@@ -1,7 +1,7 @@
 import readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray
     from '../helper-functions/readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray';
 
-export const readFileTestExampleData =
+export const eighteenSolThreeScenariosTwoObjectivesExampleData =
     readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray('./data/eg4.5data-long.csv');
 
 
