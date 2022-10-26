@@ -217,9 +217,23 @@ const SB_EAF = (
 
         //#region removed solutions list
 
+        const removeSolution = (event: MouseEvent) => {
+            const eventTarget = event.target as HTMLElement;
+                const solutionId = eventTarget.parentElement?.id;
+                console.log(`solutionId: ${solutionId}`);
+                if (solutionsState.length > 1) {
+                    const solutionToRemoveIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
+                    const solutionToRemove = solutionsState[solutionToRemoveIndex];
+                    setSolutionsState([
+                        ...solutionsState.slice(0, solutionToRemoveIndex),
+                        ...solutionsState.slice(solutionToRemoveIndex + 1, solutionsState.length)
+                    ]);
+                    setRemovedSolutionsState(state => [...state, solutionToRemove]);
+                }
+        };
+
         const addSolutionBack = (event: MouseEvent) => {
             const eventTarget = event.target as HTMLElement;
-            console.log('addSolutionBack');
             const solutionToAddBackIndex = removedSolutionsState.findIndex(i => i.solutionId === eventTarget.textContent);
             const solutionToAddBack = removedSolutionsState[solutionToAddBackIndex];
             if (solutionToAddBack !== null && solutionToAddBack !== undefined)
@@ -232,11 +246,14 @@ const SB_EAF = (
             }
         };
 
+        // TODO: Solution removal looks ugly and doesn't scroll
         const removedSolutionsListSVG = svgContainer
+        //.style('overflow', 'scroll')
         .append('svg')
         .classed('svg-content', true)
+        //.attr('viewBox', '0,0,150,200')
         .attr('width', 200)
-        .attr('height', renderH);
+        .attr('height', renderH)
 
         removedSolutionsListSVG
         .append('text')
@@ -244,21 +261,23 @@ const SB_EAF = (
         .attr('y', 25)
         //.style('text-anchor', 'middle')
         //.style('font-size', '16px')
-        .text('Removed solutions')
+        .text('Removed solutions');
         //.style('fill', 'black')
-        .append('ul')
+        removedSolutionsListSVG
+        //.attr('viewBox', "0,0,200, 400")
+        .selectAll()
         //.attr('width', 100)
         //.attr('height', 400)
         //.attr('x', 0)
-        .attr('y', 50);
-
-        removedSolutionsListSVG
-        .selectAll('li')
         .data(removedSolutionsState)
         .enter()
-        .append('li')
-        .on('click', mouseEvent => addSolutionBack(mouseEvent))
-        .text(d => d.solutionId);
+        .append('text')
+        .text(d => d.solutionId)
+        .attr('x', 10)
+        .attr('y', (_,i) => 50+i*30)
+        .on('click', mouseEvent => addSolutionBack(mouseEvent));
+
+
 
         //#endregion
 
@@ -267,6 +286,7 @@ const SB_EAF = (
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
+            .attr('id', solutionsState[i].solutionId)
             .attr('width', renderW)
             .attr('height', renderH);
 
@@ -276,7 +296,8 @@ const SB_EAF = (
             .style("text-anchor", "middle")
             .style("font-size", "16px")
             .text(() => solutionsState[i].solutionId.toString())
-            .style('fill', 'black');
+            .style('fill', 'black')
+            .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
 
             // the next().value property of these iterators returns key-value pairs from the respective maps
             // value[0] is the key, value[1] is the corresponding value
