@@ -1,12 +1,19 @@
-import { axisBottom, axisLeft } from "d3-axis";
-import { scaleLinear } from "d3-scale";
-import { select } from "d3-selection";
-//import { defaultMaxListeners } from "events";
 import { useEffect, useState, useRef } from "react";
+
+import { select } from "d3-selection";
+import { scaleLinear } from "d3-scale";
+import { axisBottom, axisLeft } from "d3-axis";
+import { interpolateRainbow, interpolateViridis } from "d3-scale-chromatic";
+
 import { calculateCollisionsForSolution } from "../helper-functions/rectFunctions";
-import { ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray, ScenarioBasedSolutionUsingObjectiveVectors } from "../types/ProblemTypes";
+import {
+    ScenarioBasedObjectiveVector,
+    ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray,
+    ScenarioBasedSolutionUsingObjectiveVectors
+} from "../types/ProblemTypes";
 
 import "./Svg.css";
+import { line, symbol, symbols, symbolStar } from "d3-shape";
 
 interface solutionDimensions {
     width: number,
@@ -19,19 +26,27 @@ interface solutionDimensions {
     }
 };
 
+// TODO: Should this interface be removed and the typings moved to SB_EAF function itself?
 interface SB_EAFProps {
     solutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray;
     solutionDimensions?: solutionDimensions;
     showScenarioNames: boolean;
-    scenarioCountColors?: string[];
+    scenarioCountColorFunction?: (t: number) => string;
+    stackSolutionsToOneGraph: boolean;
 };
 
+/**
+ * 2D Visualization of Scenario-Based Empirical Attainment Function.
+ * @param scenarioCountColorFunction A function that takes in a number in the range [0,1] and returns a color string.
+ * @returns
+ */
 const SB_EAF = (
     {
         solutionCollection,
         solutionDimensions,
         showScenarioNames,
-        scenarioCountColors
+        scenarioCountColorFunction,
+        stackSolutionsToOneGraph = true
     }: SB_EAFProps) => {
 
     const ref = useRef(null);
@@ -49,7 +64,7 @@ const SB_EAF = (
             left: 80
         }
     };
-    const defaultScenarioCountColors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+
     const legendCellsX0 = 30;
     const legendCellsY0 = 60;
     const legendCellsWidth = 20;
@@ -72,9 +87,9 @@ const SB_EAF = (
         setShowScenarioNamesState
     ] = useState((showScenarioNames !== undefined) ? showScenarioNames : true);
     const [
-        scenarioCountColorsState,
-        //setScenarioCountColorsState
-    ] = useState(scenarioCountColors ? scenarioCountColors : defaultScenarioCountColors);
+        stackSolutionsToOneGraphState,
+        //setStackSolutionsToOneGraphState
+    ] = useState(stackSolutionsToOneGraph);
 
     const renderW = solutionDimensionsState.width +
         solutionDimensionsState.margin.left +
@@ -83,10 +98,20 @@ const SB_EAF = (
         solutionDimensionsState.margin.bottom +
         solutionDimensionsState.margin.top;
 
+    /* See https://stackoverflow.com/a/55621679 for why () => scenarioCountColorFunction, instead of just
+    scenarioCountColorFunction */
+    const [
+        scenarioCountColorsState,
+        //setScenarioCountColorsState
+    ] = useState(scenarioCountColorFunction
+        ? () => (colorNumber: number) => scenarioCountColorFunction(colorNumber / solutionCollection.scenarioIds.length)
+        : () => (colorNumber: number) => interpolateViridis(colorNumber / solutionCollection.scenarioIds.length));
+
     //#endregion
 
     useEffect(() => setShowScenarioNamesState(showScenarioNames), [showScenarioNames]);
 
+    /* Render the component */
     useEffect(() => {
 
         const svgContainer = select(ref.current);
@@ -116,7 +141,7 @@ const SB_EAF = (
         .attr('height', legendCellsHeight)
         .attr('x', legendCellsX0)
         .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
-        .style('fill', (_,i) => scenarioCountColorsState[i]);
+        .style('fill', (_,i) => scenarioCountColorsState(i));
 
         legendSVG
         .selectAll()
@@ -211,6 +236,16 @@ const SB_EAF = (
             tooltip
             .style('left', `${x+20}px`)
             .style('top', `${y-10}px`);
+
+            /*
+            svgContainer
+            .append('line')
+            .style('stroke', 'red')
+            .attr('x1', 0)
+            .attr('x2', 100)
+            .attr('y1', 0)
+            .attr('y2', 100)
+            */
         };
 
         //#endregion
@@ -277,16 +312,136 @@ const SB_EAF = (
         .attr('y', (_,i) => 50+i*30)
         .on('click', mouseEvent => addSolutionBack(mouseEvent));
 
-
-
         //#endregion
 
-        for (let i = 0; i < solutionsState.length; i++)
+        // TODO: Refactor this so not so much code is copypasted
+        if (!stackSolutionsToOneGraphState)
+        {
+            for (let i = 0; i < solutionsState.length; i++)
+            {
+                const svg = svgContainer
+                .append('svg')
+                .classed('svg-content', true)
+                .attr('id', solutionsState[i].solutionId)
+                .attr('width', renderW)
+                .attr('height', renderH);
+
+                svg.append('text')
+                .attr("x", (solutionDimensionsState.width / 2 + solutionDimensionsState.margin.left))
+                .attr("y", (solutionDimensionsState.margin.top / 2))
+                .style("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text(() => solutionsState[i].solutionId.toString())
+                .style('fill', 'black')
+                .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
+
+                // the next().value property of these iterators returns key-value pairs from the respective maps
+                // value[0] is the key, value[1] is the corresponding value
+                const maxIterator = solutionCollection.objectivesToMaximize.entries();
+                const nadirsIterator = solutionCollection.objectiveNadirs.entries();
+                const idealsIterator = solutionCollection.objectiveIdeals.entries();
+
+                const xScale = scaleLinear()
+                .range([0, solutionDimensionsState.width])
+                .domain(
+                    maxIterator.next().value[1]
+                    ? [nadirsIterator.next().value[1]*axisMinMultiplier, idealsIterator.next().value[1]*axisMaxMultiplier]
+                    : [idealsIterator.next().value[1]*axisMinMultiplier, nadirsIterator.next().value[1]*axisMaxMultiplier]
+                );
+                const xAxis = axisBottom(xScale).ticks(6);
+
+                svg
+                .append('g')
+                .attr(
+                    'transform',
+                    `translate(
+                        ${solutionDimensionsState.margin.left},
+                        ${solutionDimensionsState.height + solutionDimensionsState.margin.top})`)
+                .call(xAxis);
+
+                const yScale = scaleLinear()
+                .range([solutionDimensionsState.height, 0])
+                .domain(
+                    maxIterator.next().value[1]
+                    ? [nadirsIterator.next().value[1]*axisMinMultiplier, idealsIterator.next().value[1]*axisMaxMultiplier]
+                    : [idealsIterator.next().value[1]*axisMinMultiplier, nadirsIterator.next().value[1]*axisMaxMultiplier]
+                );
+                const yAxis = axisLeft(yScale).ticks(6);
+
+                svg
+                .append('g')
+                .attr(
+                    'transform',
+                    `translate(
+                        ${solutionDimensionsState.margin.left},
+                        ${solutionDimensionsState.margin.top})`)
+                .call(yAxis);
+
+                svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("x", renderW/2)
+                .attr("y", solutionDimensionsState.height + solutionDimensionsState.margin.top + 40)
+                // TODO: Line over 120
+                .text(
+                    `${solutionCollection.objectiveIds[0]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[0]) ? 'max' : 'min'})`
+                );
+
+                svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 40)
+                .attr("x", -solutionDimensionsState.width + solutionDimensionsState.margin.top)
+                // TODO: Line over 120
+                .text(`${solutionCollection.objectiveIds[1]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
+                );
+
+                const rectInfo = calculateCollisionsForSolution(solutionsState[i]);
+
+                svg.selectAll()
+                .append('g')
+                .data(rectInfo)
+                .enter()
+                .append('rect')
+                .attr('x', datum => solutionDimensionsState.margin.left + xScale(datum[0]))
+                .attr('y', solutionDefaultDimensions.margin.top)
+                .attr('width', datum => solutionDimensionsState.width - xScale(datum[0]))
+                .attr('height', datum => yScale(datum[1]))
+                .style('fill', datum => scenarioCountColorsState(datum[2]))
+                .on('mousemove', tooltipMousemove)
+                .on('mouseleave', tooltipMouseleave)
+                .on('mouseover', tooltipMouseover);
+
+                svg.selectAll()
+                .append('g')
+                .data(solutionsState[i].objectiveVectors)
+                .enter()
+                .append('circle')
+                .attr('cx', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left)
+                .attr('cy', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top)
+                .attr('r', 3)
+                .style('fill', (_,i) => {
+                    return `#${(Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16)}`;
+                });
+
+                if (showScenarioNamesState)
+                {
+                    svg.selectAll()
+                    .data(solutionsState[i].objectiveVectors)
+                    .enter()
+                    .append('text')
+                    .text(datum => datum.scenarioId)
+                    .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
+                    .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
+                    .style('pointer-events', 'none');
+                };
+            };
+        }
+        else
         {
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
-            .attr('id', solutionsState[i].solutionId)
+            .attr('id', 'solutions')
             .attr('width', renderW)
             .attr('height', renderH);
 
@@ -295,7 +450,7 @@ const SB_EAF = (
             .attr("y", (solutionDimensionsState.margin.top / 2))
             .style("text-anchor", "middle")
             .style("font-size", "16px")
-            .text(() => solutionsState[i].solutionId.toString())
+            .text('Scenarios for all solutions')
             .style('fill', 'black')
             .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
 
@@ -349,7 +504,6 @@ const SB_EAF = (
             .text(
                 `${solutionCollection.objectiveIds[0]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[0]) ? 'max' : 'min'})`
             );
-
             svg.append("text")
             .attr("text-anchor", "middle")
             .attr("transform", "rotate(-90)")
@@ -359,7 +513,14 @@ const SB_EAF = (
             .text(`${solutionCollection.objectiveIds[1]} (${solutionCollection.objectivesToMaximize.get(solutionCollection.objectiveIds[1]) ? 'max' : 'min'})`
             );
 
-            const rectInfo = calculateCollisionsForSolution(solutionsState[i]);
+            let rectInfo: Array<[number, number, number]> = [];
+
+            for (let i = 0; i < solutionsState.length; i++)
+            {
+                rectInfo = rectInfo.concat(calculateCollisionsForSolution(solutionsState[i]));
+            };
+
+            rectInfo.sort((a,b) => a[2]-b[2]);
 
             svg.selectAll()
             .append('g')
@@ -370,36 +531,62 @@ const SB_EAF = (
             .attr('y', solutionDefaultDimensions.margin.top)
             .attr('width', datum => solutionDimensionsState.width - xScale(datum[0]))
             .attr('height', datum => yScale(datum[1]))
-            .style('fill', datum => scenarioCountColorsState[datum[2]])
+            .style('fill', datum => scenarioCountColorsState(datum[2]))
             .on('mousemove', tooltipMousemove)
             .on('mouseleave', tooltipMouseleave)
             .on('mouseover', tooltipMouseover);
 
-            svg.selectAll()
-            .append('g')
-            .data(solutionsState[i].objectiveVectors)
-            .enter()
-            .append('circle')
-            .attr('cx', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left)
-            .attr('cy', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top)
-            .attr('r', 3)
-            .style('fill', (_,i) => {
-                return `#${(Math.floor((i+1)/solutionCollection.scenarioIds.length*0xAAAAAA)).toString(16)}`;
-            });
-
-            if (showScenarioNamesState)
+            for (let i = 0; i < solutionsState.length; i++)
             {
-                svg.selectAll()
-                .data(solutionsState[i].objectiveVectors)
-                .enter()
-                .append('text')
-                .text(datum => datum.scenarioId)
-                .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
-                .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
-                .style('pointer-events', 'none');
-            }
+                const currentSymbolType = symbols[i % 7];
+                const currentSymbol = symbol().type(currentSymbolType).size(24);
+                const marginedX = (d: [number, number]) => solutionDimensionsState.margin.left + xScale(d[0]);
+                const marginedY = (d: [number, number]) => solutionDimensionsState.margin.left + yScale(d[1]);
+                const lineGenerator = line()
+                    .x(d => marginedX(d))
+                    .y(d => marginedY(d));
+                const solutionPoints: Array<[number, number]> = Array<[number, number]>();
+                const currentSolution = solutionsState[i];
+                for (let j = 0; j < solutionsState[i].objectiveVectors.length; j++)
+                {
+                    const asdf5 = currentSolution.objectiveVectors[j].objectiveValues;
+                    solutionPoints.push([asdf5[0], asdf5[1]]);
+                };
 
+                const lineGroup = svg.selectAll()
+                .data([solutionPoints])
+                .enter()
+                .append('g')
+                .attr('class', 'line');
+
+                lineGroup
+                .append('path')
+                .attr('d', datum => lineGenerator(datum))
+                .attr('stroke', interpolateRainbow((i+1)/(solutionCollection.scenarioIds.length+1)/2))
+                .attr('fill', 'none');
+
+                lineGroup
+                .selectAll('symbol')
+                .data(d => d)
+                .enter()
+                .append('path')
+                .attr('transform', datum => `translate(${marginedX(datum)},${marginedY(datum)})`)
+                .attr('d', currentSymbol)
+                .attr('fill', interpolateRainbow((i+1)/(solutionCollection.scenarioIds.length+1)/2))
+
+                if (showScenarioNamesState)
+                {
+                    lineGroup.selectAll('symbol')
+                    .data(solutionsState[i].objectiveVectors)
+                    .enter()
+                    .append('text')
+                    .text(datum => datum.scenarioId)
+                    .attr('x', datum => xScale(datum.objectiveValues[0]) + solutionDimensionsState.margin.left + 4)
+                    .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
+                    .style('pointer-events', 'none');
+                };
             };
+        };
     });
 
     return <div ref={ref} id="container" className="component-container"/>

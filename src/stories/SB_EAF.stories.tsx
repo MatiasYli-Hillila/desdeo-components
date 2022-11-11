@@ -5,6 +5,7 @@ import {
     eighteenSolThreeScenariosTwoObjectivesExampleData,
     oneSolTwentyScenariosTwoObjectivesExampleData
 } from "../data/SB_EAFExampleData";
+import { interpolateBlues, interpolateViridis } from "d3-scale-chromatic";
 
 
 
@@ -13,12 +14,39 @@ export default {
     * asdf
     */
     title: "Scenario based/SB-EAF",
-    component: SB_EAF
+    component: SB_EAF,
+    argTypes: {
+        showScenarioNames: {
+            defaultValue: true,
+            control: 'boolean'
+        }/*,
+        scenarioCountColorFunction: {
+            options: ['interpolateBlues', 'interpolateViridis'],
+            //mapping: [interpolateBlues, interpolateViridis],
+            //defaultValue: 'interpolateViridis',
+            control:  { type: 'select' }
+        }
+        */
+    }
 };
 
-const Template: Story<ComponentProps<typeof SB_EAF>> = args => {
-    return <SB_EAF{...args}/>
+/*
+* Failed attempt to add the color function as a control to the storybook
+
+const testiFunktio = (valueScenarioCountColorFunction: string): ((t: number) => string) => {
+    return interpolateBlues;
+}
+
+
+const Template: Story<ComponentProps<typeof SB_EAF>> = {(colorFunctionString: string, args)} => {
+    const testiTulos = testiFunktio(colorFunctionString);
+    return <SB_EAF scenarioCountColorFunction={testiTulos} {...args}/>
 };
+*/
+
+const Template: Story<ComponentProps<typeof SB_EAF>> = args => {
+    return <SB_EAF {...args} />
+}
 
 /*
 export const Controls = Template.bind({});
@@ -32,35 +60,14 @@ Controls.args = {
 
 export const EighteenSolutionsThreeScenariosTwoObjectives = Template.bind({});
 EighteenSolutionsThreeScenariosTwoObjectives.args = {
-    showScenarioNames: true,
+    //showScenarioNames: true,
     solutionCollection: eighteenSolThreeScenariosTwoObjectivesExampleData
 };
 
 
 export const OneSolutionTwentyScenariosTwoObjectivesCustomColors = Template.bind({});
 OneSolutionTwentyScenariosTwoObjectivesCustomColors.args = {
-    showScenarioNames: true,
-    solutionCollection: oneSolTwentyScenariosTwoObjectivesExampleData,
-    scenarioCountColors: [
-        '#0000AA',
-        '#0000CC',
-        '#0000EE',
-        '#0022FF',
-        '#0044DD',
-        '#0066BB',
-        '#008800',
-        '#00AA00',
-        '#00CC00',
-        '#00EE00',
-        '#22FF00',
-        '#44DD00',
-        '#66BB00',
-        '#880000',
-        '#AA0000',
-        '#CC0000',
-        '#EE0000',
-        '#FF0022',
-        '#DD0044',
-        '#BB0066',
-    ]
+    //showScenarioNames: true,
+    solutionCollection: oneSolTwentyScenariosTwoObjectivesExampleData
+    //scenarioCountColorFunction: interpolateBlues
 };
