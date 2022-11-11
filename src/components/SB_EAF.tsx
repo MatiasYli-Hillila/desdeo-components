@@ -55,8 +55,8 @@ const SB_EAF = (
     //#region Constants and states
 
     const solutionDefaultDimensions: solutionDimensions = {
-        width: 300,
-        height: 300,
+        width: 500,
+        height: 500,
         margin: {
             top: 80,
             right: 20,
@@ -121,7 +121,7 @@ const SB_EAF = (
 
         const legendSVG = svgContainer
         .append('svg')
-        .classed('svg-content', true)
+        .classed('legend', true)
         .attr('width', 200)
         .attr('height', renderH);
 
@@ -155,21 +155,6 @@ const SB_EAF = (
         .style('font-size', '12px')
         .text((_,i) => i+1)
         .style('fill', 'black');
-
-        /*
-        legendSVG
-        .append('text')
-        .attr('x', 20)
-        .attr('y', 200)
-        .text('Solution');
-
-        legendSVG
-        .append("circle")
-        .attr("cx", 30)
-        .attr("cy", 220)
-        .attr("r", 3)
-        .style("fill", "green");
-        */
 
         //#endregion
 
@@ -553,7 +538,8 @@ const SB_EAF = (
                     solutionPoints.push([asdf5[0], asdf5[1]]);
                 };
 
-                const lineGroup = svg.selectAll()
+                const lineGroup = svg
+                .selectAll()
                 .data([solutionPoints])
                 .enter()
                 .append('g')
@@ -572,7 +558,7 @@ const SB_EAF = (
                 .append('path')
                 .attr('transform', datum => `translate(${marginedX(datum)},${marginedY(datum)})`)
                 .attr('d', currentSymbol)
-                .attr('fill', interpolateRainbow((i+1)/(solutionCollection.scenarioIds.length+1)/2))
+                .attr('fill', interpolateRainbow((i+1)/(solutionCollection.scenarioIds.length+1)/2));
 
                 if (showScenarioNamesState)
                 {
@@ -585,8 +571,46 @@ const SB_EAF = (
                     .attr('y', datum => yScale(datum.objectiveValues[1]) + solutionDimensionsState.margin.top - 4)
                     .style('pointer-events', 'none');
                 };
+
+                const currentLegendY = legendCellsY0 + (solutionCollection.scenarioIds.length + 1.5 + i) * legendCellsHeight;
+
+                legendSVG
+                .append('text')
+                .attr('x', legendCellsX0 + 20)
+                .attr('y', currentLegendY + 4)
+                // TODO: proper solution name
+                .text(`Solution ${i+1}`);
+
+                legendSVG
+                .append('path')
+                .attr('transform', `translate(${legendCellsX0}, ${currentLegendY})`)
+                .attr('d', currentSymbol)
+                .attr('fill', interpolateRainbow((i+1)/(solutionCollection.scenarioIds.length+1)/2));
+
             };
-        };
+
+
+
+            for (let i = 0; i < solutionCollection.scenarioIds.length; i++)
+            {
+                legendSVG
+                .append('text')
+                .attr('x', )
+            }
+
+            legendSVG
+            .selectAll()
+            .data(solutionCollection.scenarioIds)
+            .enter()
+            .append('text')
+            .attr('id', (_,i) => `legend-text-${i+1}`)
+            .attr('x', legendCellsX0 + 1.5*legendCellsWidth)
+            .attr('y', (_,i) => legendCellsY0 + (i+0.5)*legendCellsHeight + 4)
+            .style('text-anchor', 'left')
+            .style('font-size', '12px')
+            .text((_,i) => i+1)
+            .style('fill', 'black');
+            };
     });
 
     return <div ref={ref} id="container" className="component-container"/>
