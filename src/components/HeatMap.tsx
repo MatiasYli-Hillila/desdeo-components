@@ -14,6 +14,7 @@ import {
 } from "../types/ProblemTypes";
 
 import "./Svg.css";
+import calculateComplementaryRgbColor from "../helper-functions/calculateComplementaryRgbColor";
 
 interface solutionDimensions {
     width: number,
@@ -26,11 +27,15 @@ interface solutionDimensions {
     }
 };
 
+// TODO: Remove this interface and move typings to the HeatMap function itself?
 interface HeatMapProps {
     solutionCollection : ScenarioBasedSolutionCollectionUsingObjectiveValuesArray;
     solutionDimensions?: solutionDimensions;
 };
 
+/**
+ * Heatmap for Scenario-Based Multiobjective Optimization.
+ */
 const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     const ref = useRef(null);
     const solutionDefaultDimensions: solutionDimensions = {
@@ -53,6 +58,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
     const [removedSolutionsState, setRemovedSolutionsState] = useState(Array<ScenarioBasedSolutionUsingObjectiveValues>());
     const [scenarioIdsState, setScenarioIdsState] = useState(solutionCollection.scenarioIds);
     const [objectiveIdsState, setObjectiveIdsState] = useState(solutionCollection.objectiveIds);
+    const colorFunction = interpolateBlues;
 
     // TODO: Generalize the index swap functions, they all do the same to different arrays
     //#region index swap functions
@@ -134,7 +140,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
          */
         const tooltipMousemove = (event : MouseEvent, datum : ScenarioBasedObjectiveValue) => {
             const [x,y] = [event.pageX, event.pageY];
-            var percentOfIdealString = 'goodness% ';
+            var percentOfIdealString = 'Normalized objective value ';
 
             // TODO: Move tooltip text insert to tooltipMouseOver
             if (solutionCollection.objectiveIdeals === undefined)
@@ -170,9 +176,11 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
 
         //#region legend
 
-        const legendColors = [interpolateBlues(0), interpolateBlues(1)];
+        const legendColors = [colorFunction(0), colorFunction(1)];
 
-        const legendSVG = svgContainer.append('svg').classed('svg-content', true)
+        const legendSVG = svgContainer
+        .append('svg')
+        .classed('legend', true)
         .attr('width', 100 + 20)
         .attr('height', 400);
         //.style('outline', 'thick solid #FFFFFF');
@@ -357,10 +365,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .on('start', objectiveDragStart)
             .on('end', objectiveDragEnd);
 
+            // TODO: Move this next to addSolutionBack
             const removeSolution = (event: MouseEvent) => {
                 const eventTarget = event.target as HTMLElement;
                 const solutionId = eventTarget.parentElement?.id;
-                console.log(`solutionId: ${solutionId}`);
                 if (solutionsState.length > 1) {
                     const solutionToRemoveIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
                     const solutionToRemove = solutionsState[solutionToRemoveIndex];
@@ -370,7 +378,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     ]);
                     setRemovedSolutionsState(state => [...state, solutionToRemove]);
                 }
-            }
+            };
 
             //#endregion
 
@@ -429,9 +437,12 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .style('fill', 'black')
             .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
 
-            svg.selectAll()
+            const cellValuesGroup = svg.selectAll()
             .append('g')
-            .data(solutionsState[i].objectiveValues)
+            .data(solutionsState[i].objectiveValues);
+
+            // TODO: cellValuesGroup calculates x, y, fill more than once
+            cellValuesGroup
             .enter()
             .append('rect')
             .attr('class', solutionsState[i].solutionId)
@@ -442,7 +453,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             .style('fill', datum => {
                 const nadir = solutionCollection.objectiveNadirs.get(datum.objectiveId)!;
                 const ideal = solutionCollection.objectiveIdeals.get(datum.objectiveId)!;
-                return interpolateBlues((datum.objectiveValue - nadir) / (ideal - nadir));
+                return colorFunction((datum.objectiveValue - nadir) / (ideal - nadir));
             })
             .on('mousemove', tooltipMousemove)
             .on('mouseleave', tooltipMouseleave)
@@ -453,6 +464,52 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             // TODO: Refactor ts-ignore away
             // @ts-ignore
             .call(solutionDrag);
+
+            cellValuesGroup
+            .enter()
+            .append('text')
+            .attr('x', datum => xScale(datum.scenarioId)! + solutionDimensionsState.margin.left + xScale.bandwidth()/2)
+            .attr('y', datum => yScale(datum.objectiveId)! + solutionDimensionsState.margin.top + yScale.bandwidth()/2 - 20)
+            .text(datum => `${datum.objectiveValue}`)
+            .style("text-anchor", "middle")
+            .style('fill', datum => {
+                const nadir = solutionCollection.objectiveNadirs.get(datum.objectiveId)!;
+                const ideal = solutionCollection.objectiveIdeals.get(datum.objectiveId)!;
+                let currentCellColor = (datum.objectiveValue - nadir) / (ideal - nadir) + 0.5;
+                if (currentCellColor > 1) currentCellColor =- 1;
+                return colorFunction(currentCellColor);
+            })
+            //.style("text-shadow", "1px 0 white, 0 1px white")
+            /* .style('fill', datum => {
+                const nadir = solutionCollection.objectiveNadirs.get(datum.objectiveId)!;
+                const ideal = solutionCollection.objectiveIdeals.get(datum.objectiveId)!;
+                let currentCellColor = colorFunction((datum.objectiveValue - nadir) / (ideal - nadir));
+                return calculateComplementaryRgbColor(currentCellColor);
+            }) */
+            .style('pointer-events', 'none');
+
+            cellValuesGroup
+            .enter()
+            .append('text')
+            .attr('x', datum => xScale(datum.scenarioId)! + solutionDimensionsState.margin.left + xScale.bandwidth()/2)
+            .attr('y', datum => yScale(datum.objectiveId)! + solutionDimensionsState.margin.top + yScale.bandwidth()/2)
+            .text(datum => {
+                const nadir = solutionCollection.objectiveNadirs.get(datum.objectiveId)!;
+                const ideal = solutionCollection.objectiveIdeals.get(datum.objectiveId)!;
+                return `(${((datum.objectiveValue - nadir) / (ideal - nadir)).toFixed(2)})`;
+            })
+            .style("text-anchor", "middle")
+            .style('fill', datum => {
+                const nadir = solutionCollection.objectiveNadirs.get(datum.objectiveId)!;
+                const ideal = solutionCollection.objectiveIdeals.get(datum.objectiveId)!;
+                let currentCellColor = (datum.objectiveValue - nadir) / (ideal - nadir) + 0.5;
+                if (currentCellColor > 1) currentCellColor =- 1;
+                return colorFunction(currentCellColor);
+            })
+            //.style('fill', 'red')
+            // TODO: Following doesn't work because this is svg, add a rect instead?
+            .style('pointer-events', 'none');
+
         };
 
     });
