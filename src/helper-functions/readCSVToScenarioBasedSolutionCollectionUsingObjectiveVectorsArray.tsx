@@ -43,7 +43,30 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
         readFileSolutionCollection.objectiveIds = data.columns.slice(2);
         let readFileSolutionIds: string[] = [];
 
-        for (let i = 0; i < data.length; i++)
+        let zeroOrOne = 0;
+        if (data[0].solution === '-1' || data[0].solution === '1')
+        {
+            zeroOrOne = 1;
+            const rowZeroValues = Object.values(data[0])
+            for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
+            {
+                let beingMaximized = false;
+                console.log(rowZeroValues[i]);
+                if (rowZeroValues[i] === '-1') beingMaximized = true;
+                else if (rowZeroValues[i] === '1') beingMaximized = false;
+                else console.warn('Warning: Wrongly formatted min/max information while reading csv to ObjValuesArray.');
+                readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], beingMaximized);
+            };
+        }
+        else
+        {
+            for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
+            {
+                readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], false);
+            }
+        };
+
+        for (let i = zeroOrOne; i < data.length; i++)
         {
             let currentSolutionId = data[i].solution!;
             let currentScenarioId = data[i].scenario!;
@@ -77,19 +100,6 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
         };
 
         calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray(readFileSolutionCollection);
-
-        /*
-        const asdf = readFileSolutionCollection.solutions[0];
-        if (asdf !== undefined) {
-            console.log('readFileSolutionCollection.solutions:');
-            console.log(readFileSolutionCollection.solutions);
-            console.log(`Entering calculateCollisionsForSolution for asdf:`);
-            console.log(asdf);
-            const qwer = calculateCollisionsForSolution(asdf);
-            console.log('readCSV vectors, rects:');
-            console.log(qwer);
-        }
-        */
     });
 
 
