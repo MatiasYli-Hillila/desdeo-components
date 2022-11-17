@@ -1,21 +1,30 @@
 .svg-container {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  padding-bottom: 100%;
-  vertical-align: top;
-  overflow: hidden;
-}
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    vertical-align: top;
+    overflow: hidden;
+};
+
 .component-container {
-  position: static;
-  width: 100%;
-  height: 100%;
-  padding-bottom: 100%;
-  vertical-align: top;
-  overflow: visible;
+};
+
+.solution {
+    display: inline;
+    float: left;
 }
+
+.legend {
+    display: inline;
+    position: sticky;
+    float: right;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    margin-left: 10%;
+};
+
 .svg-content {
-  float: left;
-  top: 0;
-  left: 0;
-}
+};

@@ -9,7 +9,8 @@ import { calculateCollisionsForSolution } from "../helper-functions/rectFunction
 import {
     ScenarioBasedObjectiveVector,
     ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray,
-    ScenarioBasedSolutionUsingObjectiveVectors
+    ScenarioBasedSolutionUsingObjectiveVectors,
+    MinOrMax
 } from "../types/ProblemTypes";
 
 import "./Svg.css";
@@ -33,12 +34,12 @@ interface SB_EAFProps {
     showScenarioNames: boolean;
     scenarioCountColorFunction?: (t: number) => string;
     stackSolutionsToOneGraph: boolean;
+    minOrMaxArray: MinOrMax[];
 };
 
 /**
  * 2D Visualization of Scenario-Based Empirical Attainment Function.
  * @param scenarioCountColorFunction A function that takes in a number in the range [0,1] and returns a color string.
- * @returns
  */
 const SB_EAF = (
     {
@@ -46,7 +47,8 @@ const SB_EAF = (
         solutionDimensions,
         showScenarioNames,
         scenarioCountColorFunction,
-        stackSolutionsToOneGraph = true
+        stackSolutionsToOneGraph = false,
+        minOrMaxArray
     }: SB_EAFProps) => {
 
     const ref = useRef(null);
@@ -114,24 +116,38 @@ const SB_EAF = (
     /* Render the component */
     useEffect(() => {
 
-        const svgContainer = select(ref.current);
-        svgContainer.selectAll('*').remove();
+        const componentContainer = select(ref.current).classed('component-container', true);
+        //const svgContainer = select(ref.current);
+        componentContainer.selectAll('*').remove();
+
+        const svgContainer = componentContainer.append('svg');//.classed('div-inline', true);
+
+
 
         //#region legend
 
-        const legendSVG = svgContainer
+        const legendContainer = componentContainer
         .append('svg')
         .classed('legend', true)
         .attr('width', 200)
         .attr('height', renderH);
 
-        legendSVG
+        //.append('div').classed('div-inline', true).attr('width', 500);
+
+        const legendSVG = legendContainer
+        .append('svg')
+        .classed('legend', true)
+        .attr('width', 200)
+        .attr('height', renderH)
+        .style('margin-left', 200);
+
+        legendContainer
         .append('text')
         .attr('x', 20)
         .attr('y', 25)
         .text('Number of scenarios');
 
-        legendSVG
+        legendContainer
         .selectAll()
         .data(solutionCollection.scenarioIds)
         .enter()
@@ -143,7 +159,7 @@ const SB_EAF = (
         .attr('y', (_,i) => legendCellsY0 + i*legendCellsHeight)
         .style('fill', (_,i) => scenarioCountColorsState(i));
 
-        legendSVG
+        legendContainer
         .selectAll()
         .data(solutionCollection.scenarioIds)
         .enter()
@@ -180,40 +196,40 @@ const SB_EAF = (
 
             tooltip.style('visibility', 'visible');
 
-            legendSVG
+            legendContainer
             .select(`#legend-rect-${datum[2]+1}`)
             .style('stroke-width', 2)
             .style('stroke', 'rgb(0,0,0');
 
-            const legendSVGFontSize = Number(
-                legendSVG
+            const legendFontSize = Number(
+                legendContainer
                 .select(`#legend-text-${datum[2]+1}`)
                 .style('font-size')
                 .slice(0,-2)
             );
 
-            legendSVG
+            legendContainer
                 .select(`#legend-text-${datum[2]+1}`)
-                .style('font-size', `${legendSVGFontSize+4}px`);
+                .style('font-size', `${legendFontSize+4}px`);
         };
 
         const tooltipMouseleave = (_: MouseEvent, datum: [number, number, number]) => {
             tooltip.style('visibility', 'hidden');
 
-            legendSVG
+            legendContainer
             .selectAll('rect')
             .style('stroke-width', 0);
 
-            const legendSVGFontSize = Number(
-                legendSVG
+            const legendFontSize = Number(
+                legendContainer
                 .select(`#legend-text-${datum[2]+1}`)
                 .style('font-size')
                 .slice(0,-2)
             );
 
-            legendSVG
+            legendContainer
                 .select(`#legend-text-${datum[2]+1}`)
-                .style('font-size', `${legendSVGFontSize-4}px`);
+                .style('font-size', `${legendFontSize-4}px`);
         };
 
         const tooltipMousemove = (event: MouseEvent) => {
@@ -304,9 +320,9 @@ const SB_EAF = (
         {
             for (let i = 0; i < solutionsState.length; i++)
             {
-                const svg = svgContainer
+                const svg = componentContainer
                 .append('svg')
-                .classed('svg-content', true)
+                .classed('solution', true)
                 .attr('id', solutionsState[i].solutionId)
                 .attr('width', renderW)
                 .attr('height', renderH);
@@ -423,9 +439,9 @@ const SB_EAF = (
         }
         else
         {
-            const svg = svgContainer
+            const svg = componentContainer
             .append('svg')
-            .classed('svg-content', true)
+            .classed('solution', true)
             .attr('id', 'solutions')
             .attr('width', renderW)
             .attr('height', renderH);
@@ -574,14 +590,14 @@ const SB_EAF = (
 
                 const currentLegendY = legendCellsY0 + (solutionCollection.scenarioIds.length + 1.5 + i) * legendCellsHeight;
 
-                legendSVG
+                legendContainer
                 .append('text')
                 .attr('x', legendCellsX0 + 20)
                 .attr('y', currentLegendY + 4)
                 // TODO: proper solution name
                 .text(`Solution ${i+1}`);
 
-                legendSVG
+                legendContainer
                 .append('path')
                 .attr('transform', `translate(${legendCellsX0}, ${currentLegendY})`)
                 .attr('d', currentSymbol)
@@ -591,14 +607,17 @@ const SB_EAF = (
 
 
 
+            /*
             for (let i = 0; i < solutionCollection.scenarioIds.length; i++)
             {
-                legendSVG
+                legendContainer
                 .append('text')
                 .attr('x', )
             }
+            */
 
-            legendSVG
+            /*
+            legendContainer
             .selectAll()
             .data(solutionCollection.scenarioIds)
             .enter()
@@ -610,10 +629,14 @@ const SB_EAF = (
             .style('font-size', '12px')
             .text((_,i) => i+1)
             .style('fill', 'black');
+            */
+
+
             };
     });
 
-    return <div ref={ref} id="container" className="component-container"/>
+    //return <div ref={ref} id="container" className="component-container"/>;
+    return <div ref={ref} id="container"/>;
 };
 
 export default SB_EAF;
