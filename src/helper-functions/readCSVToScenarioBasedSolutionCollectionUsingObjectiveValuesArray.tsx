@@ -1,5 +1,4 @@
 // TODO: Add support for files to define nadir and ideal vectors
-// TODO: Add support for files to define which objectives to minimize or maximize?
 
 import { csv } from "d3-fetch";
 import {
@@ -17,9 +16,11 @@ import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArra
  *
  * CSV file is assumed to have the following structure:
  *
- * Line 1: solution, scenario, objective id 1, objective id 2, ...
+ * * Line 1: solution, scenario, objective id 1, objective id 2, ...
  *
- * Line 2 to infinity: solution id string, scenario id string, numeric value, numeric value...
+ *     * solution and scenario are expected in all lowercase
+ *
+ * * Line 2 to infinity: solution id string, scenario id string, numeric value, numeric value...
  *
  * ---
  *
@@ -27,6 +28,7 @@ import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArra
  */
 export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray(CSVFileName: string)
 {
+    console.group('csvValuesArray, outside async');
     const csvData = csv(CSVFileName);
     console.log(csvData);
     // TODO: Should this be renamed?
@@ -40,21 +42,43 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVa
     };
 
     csvData.then(data => {
+        console.group('csvValuesArray, inside async')
         readFileSolutionCollection.objectiveIds = data.columns.slice(2);
+        if (data[0].solution === undefined)
+        {
+            throw new Error(`Error reading ${CSVFileName}: first line of file does not contain word 'solution' in lowercase.`);
+        }
         let readFileSolutionIds: string[] = [];
 
         let zeroOrOne = 0;
-        if (data[0].solution === '-1' || data[0].solution === '1')
+        if (/^(1|min|-1|max)$/.test(data[0].solution))
         {
             zeroOrOne = 1;
             const rowZeroValues = Object.values(data[0])
             for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
             {
                 let beingMaximized = false;
+                console.log(`Row zero, value ${i}:`)
                 console.log(rowZeroValues[i]);
-                if (rowZeroValues[i] === '-1') beingMaximized = true;
-                else if (rowZeroValues[i] === '1') beingMaximized = false;
-                else console.warn('Warning: Wrongly formatted min/max information while reading csv to ObjValuesArray.');
+                switch(rowZeroValues[i])
+                {
+                    case '1': beingMaximized = false;
+                    break;
+
+                    case 'min': beingMaximized = false;
+                    break;
+
+                    case '-1': beingMaximized = true;
+                    break;
+
+                    case 'max': beingMaximized = true;
+                    break;
+
+                    default:
+                    console.warn('Warning: Wrongly formatted min/max information while reading csv to ObjValuesArray.');
+                    beingMaximized = true;
+                }
+
                 readFileSolutionCollection.objectivesToMaximize.set(readFileSolutionCollection.objectiveIds[i], beingMaximized);
             };
         }
@@ -96,7 +120,10 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVa
         };
 
         calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveValuesArray(readFileSolutionCollection);
+        console.groupEnd();
     });
 
+    console.log(readFileSolutionCollection);
+    console.groupEnd();
     return readFileSolutionCollection;
 };

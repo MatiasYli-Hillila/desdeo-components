@@ -4,7 +4,8 @@ import HeatMap from "../components/HeatMap";
 import {
     exampleData2Objectives2Scenarios2Solutions,
     exampleData3Objectives3Scenarios3Solutions,
-    readFileTestExampleData
+    readFileTestExampleData,
+    forest2D
 } from "../data/HeatMapExampleData";
 
 
@@ -31,3 +32,18 @@ export const readFileDataTest = Template.bind({});
 readFileDataTest.args = {
     solutionCollection: readFileTestExampleData
 };
+
+export const ForestOptimization2D = Template.bind({});
+ForestOptimization2D.args = {
+    solutionDimensions: {
+        width: 800,
+        height: 200,
+        margin: {
+            left: 120,
+            right: 80,
+            top: 80,
+            bottom: 80
+        }
+    },
+    solutionCollection: forest2D
+}

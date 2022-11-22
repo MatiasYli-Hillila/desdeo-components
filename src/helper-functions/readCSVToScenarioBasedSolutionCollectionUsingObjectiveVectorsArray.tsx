@@ -1,5 +1,4 @@
 // TODO: Add support for files to define nadir and ideal vectors
-// TODO: Add support for files to define which objectives to minimize or maximize?
 
 import { csv } from "d3-fetch";
 import {
@@ -28,6 +27,7 @@ import calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArr
  */
 export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray(CSVFileName: string)
 {
+    console.group('csvVectorArray, outside async');
     const csvData = csv(CSVFileName);
     // TODO: Should this be renamed?
     let readFileSolutionCollection: ScenarioBasedSolutionCollectionUsingObjectiveVectorsArray = {
@@ -40,18 +40,24 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
     };
 
     csvData.then(data => {
+        console.group('csvVectorArray, inside async')
+        console.log('VectorReader data:');
+        console.log(data);
         readFileSolutionCollection.objectiveIds = data.columns.slice(2);
         let readFileSolutionIds: string[] = [];
-
         let zeroOrOne = 0;
-        if (data[0].solution === '-1' || data[0].solution === '1')
+
+        if (
+            data[0].solution === '1' ||
+            data[0].solution === 'min' ||
+            data[0].solution === '-1' ||
+            data[0].solution === 'max')
         {
             zeroOrOne = 1;
             const rowZeroValues = Object.values(data[0])
             for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
             {
                 let beingMaximized = false;
-                console.log(rowZeroValues[i]);
                 if (rowZeroValues[i] === '-1') beingMaximized = true;
                 else if (rowZeroValues[i] === '1') beingMaximized = false;
                 else console.warn('Warning: Wrongly formatted min/max information while reading csv to ObjValuesArray.');
@@ -100,9 +106,9 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
         };
 
         calculateAndSetNadirAndIdealForSolutionCollectionUsingObjectiveVectorsArray(readFileSolutionCollection);
+        console.groupEnd();
     });
 
-
-
+    console.groupEnd();
     return readFileSolutionCollection;
 };

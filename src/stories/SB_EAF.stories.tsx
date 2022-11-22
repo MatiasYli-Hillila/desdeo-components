@@ -3,7 +3,8 @@ import { Story } from "@storybook/react";
 import SB_EAF from "../components/SB_EAF";
 import {
     eighteenSolThreeScenariosTwoObjectivesExampleData,
-    oneSolTwentyScenariosTwoObjectivesExampleData
+    oneSolTwentyScenariosTwoObjectivesExampleData,
+    forest2D
 } from "../data/SB_EAFExampleData";
 import { interpolateBlues, interpolateViridis } from "d3-scale-chromatic";
 
@@ -71,3 +72,8 @@ OneSolutionTwentyScenariosTwoObjectivesCustomColors.args = {
     solutionCollection: oneSolTwentyScenariosTwoObjectivesExampleData
     //scenarioCountColorFunction: interpolateBlues
 };
+
+export const ForestOptimization2D = Template.bind({});
+ForestOptimization2D.args = {
+    solutionCollection: forest2D
+}

@@ -7,3 +7,5 @@ export const eighteenSolThreeScenariosTwoObjectivesExampleData =
 
 export const oneSolTwentyScenariosTwoObjectivesExampleData =
     readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray('./data/1sol20sce2obj.csv');
+
+export const forest2D = readCSVToScenarioBasedSolutionCollectionUsingObjectiveVectorsArray('./data/forest-landscape-2d.csv');

@@ -99,3 +99,5 @@ export const exampleData3Objectives3Scenarios3Solutions : ScenarioBasedSolutionC
 
 export const readFileTestExampleData =
     readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray('./data/eg4.5data-long.csv');
+
+export const forest2D = readCSVToScenarioBasedSolutionCollectionUsingObjectiveValuesArray('./data/forest-landscape-2d.csv');
