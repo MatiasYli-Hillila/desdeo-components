@@ -14,7 +14,7 @@ import {
 } from "../types/ProblemTypes";
 
 import "./Svg.css";
-import calculateComplementaryRgbColor from "../helper-functions/calculateComplementaryRgbColor";
+//import calculateComplementaryRgbColor from "../helper-functions/calculateComplementaryRgbColor";
 
 interface solutionDimensions {
     width: number,
@@ -100,11 +100,17 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
 
     // TODO: Make these into their own object, move to another file, something else? Remove useRef? Generalize?
     var mouseoveredSolutionIndex = useRef<number>(null!);
+    var currentMouseoveredSolution = useRef<Selection>(null!);
     var currentDraggedSolutionIndex = useRef<number>(null!);
+    var currentDraggedSolution = useRef<Selection>(null!);
+
     var mouseoveredScenarioIndex = useRef<number>(null!);
     var currentDraggedScenarioIndex = useRef<number>(null!);
+
     var mouseoveredObjectiveIndex = useRef<number>(null!);
     var currentDraggedObjectiveIndex = useRef<number>(null!);
+
+    var dragStartMousePosition = useRef<[number,number]>(null!);
 
     const renderW =
         solutionDimensionsState.width + solutionDimensionsState.margin.left + solutionDimensionsState.margin.right;
@@ -132,7 +138,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         .style('position', 'absolute')
         .style('z-index', 1000);
 
-        const tooltipMouseover = () => tooltip.style('visibility', 'visible');
+        const tooltipMouseover = () => {
+            if (currentDraggedSolution.current !== null) return;
+            else tooltip.style('visibility', 'visible');
+        }
         const tooltipMouseleave = () => tooltip.style('visibility', 'hidden');
 
         /**
@@ -290,11 +299,11 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             const svg = svgContainer
             .append('svg')
             .classed('svg-content', true)
-            .attr('id', solutionsState[i].solutionId)
+            .attr('id', solutionsState[i].solutionId.replace(/ /g,"_"))
             .attr('width', renderW)
             .attr('height', renderH)
 
-            if (svg === undefined) console.log('svg undefined');
+            if (svg === undefined) console.error('HeatMap: SVG for content undefined.');
 
             //#region mouse functions
 
@@ -304,21 +313,70 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 const solutionId = target.classList.value;
                 const solutionIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
                 mouseoveredSolutionIndex.current = solutionIndex;
+                if (currentDraggedSolution.current !== null)
+                {
+                    const solutionSelection = select(event.rangeParent);
+                    currentMouseoveredSolution.current = solutionSelection;
+                    currentMouseoveredSolution.current
+                    .style('border', 'solid')
+                    .style('border-width', '1px');
+                }
             };
 
-            const solutionDragStart = (dragStartobject: any) => {
-                const solutionId = dragStartobject.sourceEvent.target.classList.value;
+            const solutionMouseleave = () => {
+                if (currentMouseoveredSolution.current === null) return;
+                else currentMouseoveredSolution.current
+                .style('border', 'none');
+            }
+
+            const solutionDragStart = (dragObject: any) => {
+                const solutionId = dragObject.sourceEvent.target.classList.value;
                 const solutionIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
                 currentDraggedSolutionIndex.current = solutionIndex;
+                dragStartMousePosition.current = [dragObject.sourceEvent.pageX, dragObject.sourceEvent.pageY];
+
+                const solutionSelection = select(dragObject.sourceEvent.rangeParent);
+                solutionSelection.style('pointer-events', 'none');
+
+                // @ts-ignore
+                currentDraggedSolution.current = solutionSelection;
+                currentDraggedSolution.current
+                // @ts-ignore
+                .style('border', 'solid')
+                .style('border-width', '1px');
+            };
+
+            const solutionDragUnderway = (dragObject: any) => {
+                const dragMouseDifference = [
+                    dragObject.sourceEvent.pageX - dragStartMousePosition.current[0],
+                    dragObject.sourceEvent.pageY - dragStartMousePosition.current[1],
+                ];
+
+                // @ts-ignore
+                currentDraggedSolution.current.attr(
+                    'transform',
+                    `translate(${dragMouseDifference[0]}, ${dragMouseDifference[1]})`
+                );
             };
 
             const solutionDragEnd = () => {
+                // @ts-ignore
+                currentDraggedSolution.current.attr(
+                    'transform',
+                    `translate(${0}, ${0})`
+                );
+                currentDraggedSolution.current
+                // @ts-ignore
+                .style('mouse-events', 'auto');
+
                 if (mouseoveredSolutionIndex.current === null || currentDraggedSolutionIndex.current === null) return;
                 else swapSolutions(currentDraggedSolutionIndex.current, mouseoveredSolutionIndex.current);
+                currentDraggedSolution.current = null!;
             };
 
             const solutionDrag = drag()
             .on('start', solutionDragStart)
+            .on('drag', solutionDragUnderway)
             .on('end', solutionDragEnd);
 
             const scenarioMouseover = (event: MouseEvent) => {
@@ -456,7 +514,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 return colorFunction((datum.objectiveValue - nadir) / (ideal - nadir));
             })
             .on('mousemove', tooltipMousemove)
-            .on('mouseleave', tooltipMouseleave)
+            .on('mouseleave', () => {
+                tooltipMouseleave();
+                solutionMouseleave();
+            })
             .on('mouseover', (d) => {
                 tooltipMouseover();
                 solutionMouseover(d);
