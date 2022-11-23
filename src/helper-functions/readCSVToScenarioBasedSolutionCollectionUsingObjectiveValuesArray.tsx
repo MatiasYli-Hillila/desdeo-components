@@ -51,10 +51,10 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVa
         let readFileSolutionIds: string[] = [];
 
         let zeroOrOne = 0;
-        if (/^(1|min|-1|max)$/.test(data[0].solution))
+        const rowZeroValues = Object.values(data[0]);
+        if (/^(1|min|-1|max)$/.test(data[0].solution) && rowZeroValues[rowZeroValues.length-1] === '')
         {
             zeroOrOne = 1;
-            const rowZeroValues = Object.values(data[0])
             for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
             {
                 let beingMaximized = false;

@@ -44,17 +44,18 @@ export default function readCSVToScenarioBasedSolutionCollectionUsingObjectiveVe
         console.log('VectorReader data:');
         console.log(data);
         readFileSolutionCollection.objectiveIds = data.columns.slice(2);
+        if (data[0].solution === undefined)
+        {
+            throw new Error(`Error reading ${CSVFileName}: first line of file does not contain word 'solution' in lowercase.`);
+        }
         let readFileSolutionIds: string[] = [];
         let zeroOrOne = 0;
+        const rowZeroValues = Object.values(data[0]);
 
-        if (
-            data[0].solution === '1' ||
-            data[0].solution === 'min' ||
-            data[0].solution === '-1' ||
-            data[0].solution === 'max')
+        if (/^(1|min|-1|max)$/.test(data[0].solution) && rowZeroValues[rowZeroValues.length-1] === '')
         {
             zeroOrOne = 1;
-            const rowZeroValues = Object.values(data[0])
+
             for (let i = 0; i < readFileSolutionCollection.objectiveIds.length; i++)
             {
                 let beingMaximized = false;
