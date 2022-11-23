@@ -480,6 +480,12 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                     ${solutionDimensionsState.margin.top})`)
             .call(yAxis)
             .selectAll('text')
+            .text(datum => {
+                const objectiveIsToMaximize = solutionCollection.objectivesToMaximize.get(datum);
+                let stringToAppend;
+                if (objectiveIsToMaximize) { stringToAppend = ' (max)'; }
+                else { stringToAppend = ' (min)'; }
+                return datum + stringToAppend;
             .attr('class', d => d)
             .on('mouseover', objectiveMouseover)
             // TODO: Refactor ts-ignore away
