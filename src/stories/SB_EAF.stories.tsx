@@ -6,7 +6,7 @@ import {
     oneSolTwentyScenariosTwoObjectivesExampleData,
     forest2D
 } from "../data/SB_EAFExampleData";
-import { interpolateBlues, interpolateViridis } from "d3-scale-chromatic";
+//import { interpolateBlues, interpolateViridis } from "d3-scale-chromatic";
 
 
 

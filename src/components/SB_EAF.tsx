@@ -34,7 +34,7 @@ interface SB_EAFProps {
     showScenarioNames: boolean;
     scenarioCountColorFunction?: (t: number) => string;
     stackSolutionsToOneGraph: boolean;
-    minOrMaxArray: MinOrMax[];
+    minOrMaxArray?: MinOrMax[];
 };
 
 /**
@@ -47,7 +47,7 @@ const SB_EAF = (
         solutionDimensions,
         showScenarioNames,
         scenarioCountColorFunction,
-        stackSolutionsToOneGraph = false,
+        stackSolutionsToOneGraph = true,
         minOrMaxArray
     }: SB_EAFProps) => {
 
@@ -66,6 +66,8 @@ const SB_EAF = (
             left: 80
         }
     };
+
+    const solutionDefaultMinOrMaxArray = [1,1];
 
     const legendCellsX0 = 30;
     const legendCellsY0 = 60;
@@ -106,8 +108,8 @@ const SB_EAF = (
         scenarioCountColorsState,
         //setScenarioCountColorsState
     ] = useState(scenarioCountColorFunction
-        ? () => (colorNumber: number) => scenarioCountColorFunction(colorNumber / solutionCollection.scenarioIds.length)
-        : () => (colorNumber: number) => interpolateViridis(colorNumber / solutionCollection.scenarioIds.length));
+        ? () => (colorNumber: number) => scenarioCountColorFunction(colorNumber / (solutionCollection.scenarioIds.length-1))
+        : () => (colorNumber: number) => interpolateViridis(colorNumber / (solutionCollection.scenarioIds.length-1)));
 
     //#endregion
 
@@ -138,8 +140,8 @@ const SB_EAF = (
         .append('svg')
         .classed('legend', true)
         .attr('width', 200)
-        .attr('height', renderH)
-        .style('margin-left', 200);
+        .attr('height', renderH);
+        //.style('margin-left', 200);
 
         legendContainer
         .append('text')
@@ -256,7 +258,7 @@ const SB_EAF = (
         const removeSolution = (event: MouseEvent) => {
             const eventTarget = event.target as HTMLElement;
                 const solutionId = eventTarget.parentElement?.id;
-                console.log(`solutionId: ${solutionId}`);
+                //console.log(`solutionId: ${solutionId}`);
                 if (solutionsState.length > 1) {
                     const solutionToRemoveIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
                     const solutionToRemove = solutionsState[solutionToRemoveIndex];
@@ -297,7 +299,7 @@ const SB_EAF = (
         .attr('y', 25)
         //.style('text-anchor', 'middle')
         //.style('font-size', '16px')
-        .text('Removed solutions');
+        .text('Hidden solutions');
         //.style('fill', 'black')
         removedSolutionsListSVG
         //.attr('viewBox', "0,0,200, 400")
@@ -326,6 +328,9 @@ const SB_EAF = (
                 .attr('id', solutionsState[i].solutionId)
                 .attr('width', renderW)
                 .attr('height', renderH);
+
+                //console.log('SB_EAF: debugging');
+                //console.log(solutionsState);
 
                 svg.append('text')
                 .attr("x", (solutionDimensionsState.width / 2 + solutionDimensionsState.margin.left))

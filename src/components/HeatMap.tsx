@@ -14,6 +14,7 @@ import {
 } from "../types/ProblemTypes";
 
 import "./Svg.css";
+import { symbol, symbols } from "d3-shape";
 //import calculateComplementaryRgbColor from "../helper-functions/calculateComplementaryRgbColor";
 
 interface solutionDimensions {
@@ -278,7 +279,7 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
         .attr('y', 20)
         .style('text-anchor', 'middle')
         .style('font-size', '16px')
-        .text(() => 'Removed solutions')
+        .text(() => 'Hidden solutions')
         .style('fill', 'black')
         .append('ul')
         //.attr('width', 100)
@@ -426,9 +427,10 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
             // TODO: Move this next to addSolutionBack
             const removeSolution = (event: MouseEvent) => {
                 const eventTarget = event.target as HTMLElement;
-                const solutionId = eventTarget.parentElement?.id;
+                // TODO: Make the below targetting less cumbersome
+                const solutionId = eventTarget.parentElement?.parentElement?.parentElement?.id;
                 if (solutionsState.length > 1) {
-                    const solutionToRemoveIndex = solutionsState.findIndex(i => i.solutionId === solutionId);
+                    const solutionToRemoveIndex = solutionsState.findIndex(i => i.solutionId === solutionId.replace(/_/g," "));
                     const solutionToRemove = solutionsState[solutionToRemoveIndex];
                     setSolutionsState([
                         ...solutionsState.slice(0, solutionToRemoveIndex),
@@ -486,20 +488,50 @@ const HeatMap = ({solutionCollection, solutionDimensions} : HeatMapProps) => {
                 if (objectiveIsToMaximize) { stringToAppend = ' (max)'; }
                 else { stringToAppend = ' (min)'; }
                 return datum + stringToAppend;
+            })
             .attr('class', d => d)
             .on('mouseover', objectiveMouseover)
             // TODO: Refactor ts-ignore away
             // @ts-ignore
             .call(objectiveDrag);
 
-            svg.append('text')
+            const solutionTitleGroup = svg.append('g')
+            .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
+
+            const solutionTitleEye = solutionTitleGroup.append('svg');
+
+            //solutionTitleEye.on('mouseover', () => solutionTitleEye.selectAll().style('background-color', 'black'));
+            solutionTitleEye.on('mouseover', d => {
+                //console.log(d);
+                const asdf = select(d.currentTarget);
+                //console.log(d.currentTarget);
+                asdf.style('background-color', 'black');
+            });
+
+            solutionTitleEye.append('path')
+            .attr(
+                'transform',
+                `translate(
+                    ${solutionDimensionsState.width / 2 - 10},
+                    ${solutionDimensionsState.margin.top / 2 - 5})`)
+            .attr('d', 'M 0 0 C 5 10, 25 10, 30 0 C 25 -10, 5 -10, 0 0')
+            .attr('stroke', 'black')
+            .attr('fill', 'transparent');
+
+
+            solutionTitleEye.append('circle')
+            .attr('cx', solutionDimensionsState.width / 2 + 5)
+            .attr('cy', solutionDimensionsState.margin.top / 2 - 5)
+            .attr('r', 3);
+
+            solutionTitleGroup.append('text')
             .attr("x", (solutionDimensionsState.width / 2 + solutionDimensionsState.margin.left))
             .attr("y", (solutionDimensionsState.margin.top / 2))
             .style("text-anchor", "middle")
             .style("font-size", "16px")
             .text(() => solutionsState[i].solutionId.toString())
-            .style('fill', 'black')
-            .on('click', removeSolutionEvent => removeSolution(removeSolutionEvent));
+            .style('fill', 'black');
+
 
             const cellValuesGroup = svg.selectAll()
             .append('g')
